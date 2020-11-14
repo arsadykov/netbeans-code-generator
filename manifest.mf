@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+AutoUpdate-Show-In-Client: true
+OpenIDE-Module: com.github.isarthur.netbeans.editor.generator
+OpenIDE-Module-Localizing-Bundle: com/github/isarthur/netbeans/editor/generator/Bundle.properties
+OpenIDE-Module-Specification-Version: 1.0
+
