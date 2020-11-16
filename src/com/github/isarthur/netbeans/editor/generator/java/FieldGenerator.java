@@ -20,19 +20,24 @@ import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.CompilationUnitTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.Tree.Kind;
+import com.sun.source.util.SourcePositions;
+import com.sun.source.util.TreePath;
+import com.sun.source.util.Trees;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.lang.model.element.Modifier;
+import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 import org.netbeans.api.editor.mimelookup.MimeRegistration;
+import org.netbeans.api.java.source.JavaSource;
+import org.netbeans.api.java.source.TreeMaker;
+import org.netbeans.api.java.source.TreeUtilities;
 import org.netbeans.api.java.source.WorkingCopy;
 import org.netbeans.spi.editor.codegen.CodeGenerator;
 import org.netbeans.spi.editor.codegen.CodeGeneratorContextProvider;
-import org.netbeans.api.java.source.JavaSource;
-import org.netbeans.api.java.source.TreeMaker;
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
@@ -45,6 +50,13 @@ public class FieldGenerator implements CodeGenerator {
 
     private final JTextComponent editor;
     private GenerateFieldsDialog dialog;
+    private Trees trees;
+    private TreeUtilities treeUtilities;
+    private TreePath currentPath;
+    private CompilationUnitTree compilationUnit;
+    private int caretPosition;
+    private JavaSource javaSource;
+    private int insertIndex;
 
     /**
      *
@@ -53,6 +65,16 @@ public class FieldGenerator implements CodeGenerator {
      */
     private FieldGenerator(Lookup context) { // Good practice is not to save Lookup outside ctor
         editor = context.lookup(JTextComponent.class);
+        initialize();
+    }
+
+    private void initialize() {
+        caretPosition = editor.getCaretPosition();
+        Document document = editor.getDocument();
+        javaSource = JavaSource.forDocument(document);
+        if (javaSource == null) {
+            throw new IllegalStateException("The document is not associated with data type providing the JavaSource."); //NOI18N
+        }
     }
 
     /**
@@ -70,14 +92,20 @@ public class FieldGenerator implements CodeGenerator {
     public void invoke() {
         dialog = GenerateFieldsDialog.createAndShow();
         if (dialog.isOkButtonPushed()) {
-            JavaSource javaSource = JavaSource.forDocument(editor.getDocument());
-            if (javaSource == null) {
-                throw new IllegalStateException();
-            }
             try {
                 javaSource.runModificationTask(workingCopy -> {
                     workingCopy.toPhase(JavaSource.Phase.RESOLVED);
-                    addFieldsToClass(workingCopy);
+                    compilationUnit = workingCopy.getCompilationUnit();
+                    trees = workingCopy.getTrees();
+                    treeUtilities = workingCopy.getTreeUtilities();
+                    currentPath = treeUtilities.pathFor(caretPosition);
+                    TreePath classPath = treeUtilities.getPathElementOfKind(Tree.Kind.CLASS, currentPath);
+                    if (classPath == null) {
+                        return;
+                    }
+                    ClassTree oldTree = (ClassTree) classPath.getLeaf();
+                    setInsertIndex(oldTree);
+                    insertFieldsIntoClass(workingCopy);
                 }).commit();
             } catch (IOException ex) {
                 Exceptions.printStackTrace(ex);
@@ -87,7 +115,7 @@ public class FieldGenerator implements CodeGenerator {
         dialog.dispose();
     }
 
-    private void addFieldsToClass(WorkingCopy workingCopy) {
+    private void insertFieldsIntoClass(WorkingCopy workingCopy) {
         ClassTree oldClassTree = getClassTree(workingCopy);
         ClassTree newClassTree = oldClassTree;
         TreeMaker make = workingCopy.getTreeMaker();
@@ -129,12 +157,13 @@ public class FieldGenerator implements CodeGenerator {
             String fieldType = (String) ((List) data.get(row)).get(5);
             String fieldName = (String) ((List) data.get(row)).get(6);
             String fieldValue = (String) ((List) data.get(row)).get(7);
-            newClassTree = make.addClassMember(
+            newClassTree = make.insertClassMember(
                     newClassTree,
+                    insertIndex + row,
                     make.Variable(
                             make.Modifiers(modifiers),
                             fieldName,
-                            make.Type(fieldType),
+                            make.QualIdent(fieldType),
                             fieldValue.isEmpty() ? null : make.Identifier(fieldValue)));
         }
         workingCopy.rewrite(oldClassTree, newClassTree);
@@ -154,6 +183,58 @@ public class FieldGenerator implements CodeGenerator {
             throw new IllegalStateException("No class in the java file!"); //NOI18N
         }
         return classTree;
+    }
+
+    private void setInsertIndex(ClassTree classTree) {
+        List<? extends Tree> members = classTree.getMembers();
+        SourcePositions sourcePositions = trees.getSourcePositions();
+        int size = members.size();
+        switch (size) {
+            case 1: {
+                Tree member = members.get(0);
+                long currentStartPosition = sourcePositions.getStartPosition(compilationUnit, member);
+                if (caretPosition < currentStartPosition) {
+                    insertIndex = 0;
+                } else {
+                    insertIndex = 1;
+                }
+                break;
+            }
+            case 2: {
+                Tree previousMember = members.get(0);
+                long previousStartPosition = sourcePositions.getStartPosition(compilationUnit, previousMember);
+                Tree currentMember = members.get(1);
+                long currentStartPosition = sourcePositions.getStartPosition(compilationUnit, currentMember);
+                if (caretPosition < previousStartPosition) {
+                    insertIndex = 0;
+                } else if (currentStartPosition < caretPosition) {
+                    insertIndex = size;
+                } else {
+                    insertIndex = 1;
+                }
+                break;
+            }
+            default:
+                for (int i = 1; i < size; i++) {
+                    Tree previousMember = members.get(i - 1);
+                    long previousStartPosition = sourcePositions.getStartPosition(compilationUnit, previousMember);
+                    Tree currentMember = members.get(i);
+                    long currentStartPosition = sourcePositions.getStartPosition(compilationUnit, currentMember);
+                    if (i < size - 1) {
+                        if (previousStartPosition < caretPosition && caretPosition < currentStartPosition) {
+                            insertIndex = i;
+                            break;
+                        }
+                    } else {
+                        if (currentStartPosition < caretPosition) {
+                            insertIndex = size;
+                        } else {
+                            insertIndex = i;
+                        }
+                    }
+                }
+                break;
+        }
     }
 
     @MimeRegistration(mimeType = "text/x-java", service = CodeGenerator.Factory.class, position = 6000) //NOI18N

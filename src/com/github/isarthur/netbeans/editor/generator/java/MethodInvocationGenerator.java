@@ -41,8 +41,8 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
-import javax.lang.model.element.VariableElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
@@ -150,7 +150,7 @@ public class MethodInvocationGenerator implements CodeGenerator {
     private void setSelectedElement() {
         LocalMembersAndVarsPanel localMembersAndVarsPanel = LocalMembersAndVarsPanel.create();
         localMembersAndVarsPanel.addElements(getLocalMembersAndVars());
-        GenerateOtherMethodInvocationsDialog dialog = 
+        GenerateOtherMethodInvocationsDialog dialog =
                 GenerateOtherMethodInvocationsDialog.createAndShow(localMembersAndVarsPanel);
         if (dialog.isOkButtonPushed()) {
             selectedElement = localMembersAndVarsPanel.getSelectedElement();
@@ -476,7 +476,7 @@ public class MethodInvocationGenerator implements CodeGenerator {
                 (PrimitiveType) t1).asType());
     }
 
-    @MimeRegistration(mimeType = "text/x-java", service = CodeGenerator.Factory.class, position = 9000) //NOI18N
+    @MimeRegistration(mimeType = "text/x-java", service = CodeGenerator.Factory.class, position = 10000) //NOI18N
     public static class Factory implements CodeGenerator.Factory {
 
         @Override

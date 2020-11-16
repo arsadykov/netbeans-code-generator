@@ -419,7 +419,7 @@ public class SetterInvocationGenerator implements CodeGenerator {
         return newTree;
     }
 
-    @MimeRegistration(mimeType = "text/x-java", service = CodeGenerator.Factory.class, position = 8000) //NOI18N
+    @MimeRegistration(mimeType = "text/x-java", service = CodeGenerator.Factory.class, position = 9000) //NOI18N
     public static class Factory implements CodeGenerator.Factory {
 
         @Override

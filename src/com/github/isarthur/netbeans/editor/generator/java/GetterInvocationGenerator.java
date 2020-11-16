@@ -25,9 +25,9 @@ import com.sun.source.tree.MemberSelectTree;
 import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.ModifiersTree;
 import com.sun.source.tree.Scope;
+import com.sun.source.tree.StatementTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.VariableTree;
-import com.sun.source.tree.StatementTree;
 import com.sun.source.util.SourcePositions;
 import com.sun.source.util.TreePath;
 import com.sun.source.util.Trees;
@@ -109,7 +109,6 @@ public class GetterInvocationGenerator implements CodeGenerator {
         if (javaSource == null) {
             throw new IllegalStateException("The document is not associated with data type providing the JavaSource."); //NOI18N
         }
-        
     }
 
     private List<Element> getLocalMembersAndVars() {
@@ -135,7 +134,6 @@ public class GetterInvocationGenerator implements CodeGenerator {
             return Collections.unmodifiableList(elements);
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
-            
         }
         return Collections.emptyList();
     }
@@ -464,7 +462,6 @@ public class GetterInvocationGenerator implements CodeGenerator {
                         varName += serialNumber;
                     } catch (NumberFormatException ex) {
                         Exceptions.printStackTrace(ex);
-                        
                     }
                 } else {
                     varName += 1;
@@ -479,7 +476,7 @@ public class GetterInvocationGenerator implements CodeGenerator {
         return newTree;
     }
 
-    @MimeRegistration(mimeType = "text/x-java", service = CodeGenerator.Factory.class, position = 7000) //NOI18N
+    @MimeRegistration(mimeType = "text/x-java", service = CodeGenerator.Factory.class, position = 8000) //NOI18N
     public static class Factory implements CodeGenerator.Factory {
 
         @Override
