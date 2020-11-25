@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -481,7 +482,33 @@ public class MethodInvocationGenerator implements CodeGenerator {
 
         @Override
         public List<? extends CodeGenerator> create(Lookup context) {
-            return Collections.singletonList(new MethodInvocationGenerator(context));
+            JTextComponent editor = context.lookup(JTextComponent.class);
+            JavaSource javaSource = JavaSource.forDocument(editor.getDocument());
+            if (javaSource == null) {
+                throw new IllegalStateException("The document is not associated with data type providing the JavaSource."); //NOI18N
+            }
+            AtomicBoolean insideBlock = new AtomicBoolean(true);
+            try {
+                javaSource.runUserActionTask(controller -> {
+                    JavaSource.Phase phase = controller.toPhase(JavaSource.Phase.RESOLVED);
+                    if (phase.compareTo(JavaSource.Phase.RESOLVED) < 0) {
+                        insideBlock.set(false);
+                        return;
+                    }
+                    TreeUtilities treeUtilities = controller.getTreeUtilities();
+                    TreePath currentPath = treeUtilities.pathFor(editor.getCaretPosition());
+                    TreePath blockPath = treeUtilities.getPathElementOfKind(Tree.Kind.BLOCK, currentPath);
+                    if (blockPath == null) {
+                        insideBlock.set(false);
+                    }
+                }, true);
+            } catch (IOException ex) {
+                Exceptions.printStackTrace(ex);
+                insideBlock.set(false);
+            }
+            return insideBlock.get()
+                    ? Collections.singletonList(new MethodInvocationGenerator(context))
+                    : Collections.emptyList();
         }
     }
 }
