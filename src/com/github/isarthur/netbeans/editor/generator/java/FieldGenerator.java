@@ -170,19 +170,11 @@ public class FieldGenerator implements CodeGenerator {
     }
 
     private ClassTree getClassTree(WorkingCopy workingCopy) {
-        CompilationUnitTree compilationUnitTree = workingCopy.getCompilationUnit();
-        List<? extends Tree> typeDeclarations = compilationUnitTree.getTypeDecls();
-        ClassTree classTree = null;
-        for (Tree typeDeclaration : typeDeclarations) {
-            if (typeDeclaration.getKind() == Kind.CLASS) {
-                classTree = (ClassTree) typeDeclaration;
-                break;
-            }
-        }
-        if (classTree == null) {
+        TreePath classPath = workingCopy.getTreeUtilities().getPathElementOfKind(Kind.CLASS, currentPath);
+        if (classPath == null) {
             throw new IllegalStateException("No class in the java file!"); //NOI18N
         }
-        return classTree;
+        return (ClassTree) classPath.getLeaf();
     }
 
     private void setInsertIndex(ClassTree classTree) {

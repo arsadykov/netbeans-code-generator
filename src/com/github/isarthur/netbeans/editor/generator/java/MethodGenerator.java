@@ -154,19 +154,13 @@ public class MethodGenerator implements CodeGenerator {
     }
 
     private ClassTree getClassOrInterfaceTree(WorkingCopy workingCopy) {
-        CompilationUnitTree compilationUnitTree = workingCopy.getCompilationUnit();
-        List<? extends Tree> typeDeclarations = compilationUnitTree.getTypeDecls();
-        ClassTree classOrInterfaceTree = null;
-        for (Tree typeDeclaration : typeDeclarations) {
-            if (typeDeclaration.getKind() == Tree.Kind.CLASS || typeDeclaration.getKind() == Tree.Kind.INTERFACE) {
-                classOrInterfaceTree = (ClassTree) typeDeclaration;
-                break;
-            }
-        }
-        if (classOrInterfaceTree == null) {
+        TreePath classOrInterfacePath = workingCopy
+                .getTreeUtilities()
+                .getPathElementOfKind(Set.of(Tree.Kind.INTERFACE, Tree.Kind.CLASS), currentPath);
+        if (classOrInterfacePath == null) {
             throw new IllegalStateException("No class or interface in the java file!"); //NOI18N
         }
-        return classOrInterfaceTree;
+        return (ClassTree) classOrInterfacePath.getLeaf();
     }
 
     private List<VariableTree> getMethodParameters(List<?> parameters, TreeMaker make) {
