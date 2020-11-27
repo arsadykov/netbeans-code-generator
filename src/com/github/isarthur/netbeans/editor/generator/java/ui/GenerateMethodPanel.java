@@ -19,7 +19,10 @@ import java.awt.Color;
 import java.awt.Component;
 import java.util.EventObject;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.lang.model.element.TypeElement;
 import javax.swing.DefaultCellEditor;
 import javax.swing.InputVerifier;
@@ -108,6 +111,24 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
         generateMethodPanel.getTypeTextField().getDocument().addDocumentListener(generateMethodPanel);
         generateMethodPanel.getNameTextField().getDocument().addDocumentListener(generateMethodPanel);
         return generateMethodPanel;
+    }
+
+    private String suggestParameterName(String type) {
+        String name = ""; //NOI18N
+        Matcher matcher = Pattern.compile("^([a-zA-Z_]\\w+?)((\\[\\])|(\\<.*?\\>))?$").matcher(type); //NOI18N
+        if (matcher.matches()) {
+            name = matcher.group(1);
+            name = name.substring(0, 1).toLowerCase(Locale.getDefault()).concat(name.substring(1));
+        } else {
+            matcher = Pattern
+                    .compile("^([a-zA-Z_]\\w+?(\\.[a-zA-Z_]\\w+?)+?)((\\[\\])|(\\<.*?\\>))?$") //NOI18N
+                    .matcher(type);
+            if (matcher.matches()) {
+                name = matcher.group(1).substring(matcher.group(1).lastIndexOf('.') + 1);
+                name = name.substring(0, 1).toLowerCase(Locale.getDefault()).concat(name.substring(1));
+            }
+        }
+        return name;
     }
 
     private JTextField getNameTextField() {
@@ -210,7 +231,7 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
         TableColumn finalColumn = parametersTable.getColumnModel().getColumn(0);
         finalColumn.setPreferredWidth(50);
         TableColumn typeColumn = parametersTable.getColumnModel().getColumn(1);
-        typeColumn.setCellEditor(new TypeEditor(false));
+        typeColumn.setCellEditor(new TypeEditor(false, parametersTable));
         typeColumn.setCellRenderer(new TypeRenderer());
         typeColumn.setPreferredWidth(350);
         TableColumn nameColumn = parametersTable.getColumnModel().getColumn(2);
@@ -295,7 +316,7 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
         });
         typeParameterNameTableColumn.setPreferredWidth(75);
         TableColumn extendsTableColumn = typeParametersTable.getColumnModel().getColumn(1);
-        extendsTableColumn.setCellEditor(new TypeEditor(true));
+        extendsTableColumn.setCellEditor(new TypeEditor(true, typeParametersTable));
         extendsTableColumn.setCellRenderer(new TypeRenderer());
         extendsTableColumn.setPreferredWidth(350);
         typeParametersScrollPane.setViewportView(typeParametersTable);
@@ -351,7 +372,7 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
         });
         TableColumn thrownTypeTableColumn = throwsTable.getColumnModel().getColumn(0);
         thrownTypeTableColumn.setCellRenderer(new TypeRenderer());
-        thrownTypeTableColumn.setCellEditor(new TypeEditor(false));
+        thrownTypeTableColumn.setCellEditor(new TypeEditor(false, throwsTable));
         throwsScrollPane.setViewportView(throwsTable);
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, org.openide.util.NbBundle.getMessage(GenerateMethodPanel.class, "GenerateMethodPanel.jPanel1.border.title"), javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION)); // NOI18N
@@ -891,9 +912,11 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
         protected transient ChangeEvent changeEvent;
         private final Border originalBorder = parameterTypeTextField.getBorder();
         private final boolean emptyAllowed;
+        private final JTable owner;
 
-        public TypeEditor(boolean emptyAllowed) {
+        public TypeEditor(boolean emptyAllowed, JTable owner) {
             this.emptyAllowed = emptyAllowed;
+            this.owner = owner;
         }
 
         @Override
@@ -932,6 +955,12 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
             }
             parameterTypeTextField.setBorder(originalBorder);
             fireEditingStopped();
+            if (owner.equals(parametersTable)) {
+                String parameterName = suggestParameterName(parameterTypeTextField.getText());
+                int selectedRow = parametersTable.getSelectedRow();
+                int parameterNameColumn = 2;
+                parametersTableModel.setValueAt(parameterName, selectedRow, parameterNameColumn);
+            }
             dialogDescriptor.setValid(valid());
             return true;
         }
