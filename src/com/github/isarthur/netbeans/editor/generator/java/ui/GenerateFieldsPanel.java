@@ -19,7 +19,10 @@ import java.awt.Color;
 import java.awt.Component;
 import java.util.EventObject;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.lang.model.element.TypeElement;
 import javax.swing.DefaultCellEditor;
 import javax.swing.InputVerifier;
@@ -392,8 +395,31 @@ public class GenerateFieldsPanel extends javax.swing.JPanel {
             }
             typeTextField.setBorder(originalBorder);
             fireEditingStopped();
+            String fieldName = suggestFieldName();
+            int selectedRow = fieldsTable.getSelectedRow();
+            int fieldNameColumn = 6;
+            fieldsTableModel.setValueAt(fieldName, selectedRow, fieldNameColumn);
             dialogDescriptor.setValid(valid());
             return true;
+        }
+
+        private String suggestFieldName() {
+            String name = ""; //NOI18N
+            String type = typeTextField.getText();
+            Matcher matcher = Pattern.compile("^([a-zA-Z_]\\w+?)((\\[\\])|(\\<.*?\\>))?$").matcher(type); //NOI18N
+            if (matcher.matches()) {
+                name = matcher.group(1);
+                name = name.substring(0, 1).toLowerCase(Locale.getDefault()).concat(name.substring(1));
+            } else {
+                matcher = Pattern
+                        .compile("^([a-zA-Z_]\\w+?(\\.[a-zA-Z_]\\w+?)+?)((\\[\\])|(\\<.*?\\>))?$") //NOI18N
+                        .matcher(type);
+                if (matcher.matches()) {
+                    name = matcher.group(1).substring(matcher.group(1).lastIndexOf('.') + 1);
+                    name = name.substring(0, 1).toLowerCase(Locale.getDefault()).concat(name.substring(1));
+                }
+            }
+            return name;
         }
 
         @Override
