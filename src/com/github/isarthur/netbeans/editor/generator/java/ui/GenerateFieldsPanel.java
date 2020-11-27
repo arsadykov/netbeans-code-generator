@@ -269,6 +269,14 @@ public class GenerateFieldsPanel extends javax.swing.JPanel {
         return fieldsTableModel.getDataVector();
     }
 
+    void stopTablesEditing() {
+        TableCellEditor cellEditor = fieldsTable.getCellEditor();
+        if (cellEditor == null) {
+            return;
+        }
+        cellEditor.stopCellEditing();
+    }
+
     void setDialogDescriptor(DialogDescriptor dialogDescriptor) {
         this.dialogDescriptor = dialogDescriptor;
         addFieldButtonActionPerformed(null);
@@ -293,6 +301,10 @@ public class GenerateFieldsPanel extends javax.swing.JPanel {
             ElementHandle<TypeElement> handle = TypeElementFinder.find(null, null, null);
             if (handle != null) {
                 typeTextField.setText(handle.getQualifiedName());
+                TableCellEditor cellEditor = fieldsTable.getCellEditor();
+                if (cellEditor != null) {
+                    cellEditor.stopCellEditing();
+                }
             }
         }
 

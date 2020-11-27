@@ -93,6 +93,7 @@ public class FieldGenerator implements CodeGenerator {
     public void invoke() {
         dialog = GenerateFieldsDialog.createAndShow();
         if (dialog.isOkButtonPushed()) {
+            dialog.stopTablesEditing();
             try {
                 javaSource.runModificationTask(workingCopy -> {
                     workingCopy.toPhase(JavaSource.Phase.RESOLVED);

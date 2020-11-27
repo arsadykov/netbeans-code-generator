@@ -231,7 +231,7 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
         TableColumn finalColumn = parametersTable.getColumnModel().getColumn(0);
         finalColumn.setPreferredWidth(50);
         TableColumn typeColumn = parametersTable.getColumnModel().getColumn(1);
-        typeColumn.setCellEditor(new TypeEditor(false, parametersTable));
+        typeColumn.setCellEditor(new ParameterTypeEditor());
         typeColumn.setCellRenderer(new TypeRenderer());
         typeColumn.setPreferredWidth(350);
         TableColumn nameColumn = parametersTable.getColumnModel().getColumn(2);
@@ -316,7 +316,7 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
         });
         typeParameterNameTableColumn.setPreferredWidth(75);
         TableColumn extendsTableColumn = typeParametersTable.getColumnModel().getColumn(1);
-        extendsTableColumn.setCellEditor(new TypeEditor(true, typeParametersTable));
+        extendsTableColumn.setCellEditor(new TypeParameterTypeEditor());
         extendsTableColumn.setCellRenderer(new TypeRenderer());
         extendsTableColumn.setPreferredWidth(350);
         typeParametersScrollPane.setViewportView(typeParametersTable);
@@ -372,7 +372,7 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
         });
         TableColumn thrownTypeTableColumn = throwsTable.getColumnModel().getColumn(0);
         thrownTypeTableColumn.setCellRenderer(new TypeRenderer());
-        thrownTypeTableColumn.setCellEditor(new TypeEditor(false, throwsTable));
+        thrownTypeTableColumn.setCellEditor(new ThrowingTypeEditor());
         throwsScrollPane.setViewportView(throwsTable);
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, org.openide.util.NbBundle.getMessage(GenerateMethodPanel.class, "GenerateMethodPanel.jPanel1.border.title"), javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION)); // NOI18N
@@ -831,12 +831,12 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
     private javax.swing.JTable typeParametersTable;
     private javax.swing.JTextField typeTextField;
     // End of variables declaration//GEN-END:variables
-    private class TypePanel extends javax.swing.JPanel {
+    private class ParameterTypePanel extends javax.swing.JPanel {
 
         /**
          * Creates new form TypePanel
          */
-        private TypePanel() {
+        private ParameterTypePanel() {
             initComponents();
             browseButton.addActionListener(this::browseButtonActionPerformed);
         }
@@ -845,6 +845,10 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
             ElementHandle<TypeElement> handle = TypeElementFinder.find(null, null, null);
             if (handle != null) {
                 parameterTypeTextField.setText(handle.getQualifiedName());
+                TableCellEditor cellEditor = parametersTable.getCellEditor();
+                if (cellEditor != null) {
+                    cellEditor.stopCellEditing();
+                }
             }
         }
 
@@ -864,7 +868,7 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
             parameterTypeTextField = new javax.swing.JTextField();
             browseButton = new javax.swing.JButton();
             Mnemonics.setLocalizedText(
-                    browseButton, org.openide.util.NbBundle.getMessage(TypePanel.class, "TypePanel.browseButton.text")); // NOI18N
+                    browseButton, org.openide.util.NbBundle.getMessage(ParameterTypePanel.class, "TypePanel.browseButton.text")); // NOI18N
             javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
             this.setLayout(layout);
             layout.setHorizontalGroup(
@@ -892,7 +896,134 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
         // End of variables declaration
     }
 
-    private class TypeRenderer extends GenerateMethodPanel.TypePanel implements TableCellRenderer {
+    private class TypeParameterTypePanel extends javax.swing.JPanel {
+
+        /**
+         * Creates new form TypePanel
+         */
+        private TypeParameterTypePanel() {
+            initComponents();
+            browseButton.addActionListener(this::browseButtonActionPerformed);
+        }
+
+        private void browseButtonActionPerformed(java.awt.event.ActionEvent evt) {
+            ElementHandle<TypeElement> handle = TypeElementFinder.find(null, null, null);
+            if (handle != null) {
+                typeParameterTypeTextField.setText(handle.getQualifiedName());
+                TableCellEditor cellEditor = typeParametersTable.getCellEditor();
+                if (cellEditor != null) {
+                    cellEditor.stopCellEditing();
+                }
+            }
+        }
+
+        void updateTypeValue(String type) {
+            typeParameterTypeTextField.setText(type);
+        }
+
+        /**
+         * This method is called from within the constructor to
+         * initialize the form.
+         * WARNING: Do NOT modify this code. The content of this method is
+         * always regenerated by the Form Editor.
+         */
+        @SuppressWarnings("unchecked")
+        // <editor-fold defaultstate="collapsed" desc="Generated Code">
+        private void initComponents() {
+            typeParameterTypeTextField = new javax.swing.JTextField();
+            browseButton = new javax.swing.JButton();
+            Mnemonics.setLocalizedText(
+                    browseButton, org.openide.util.NbBundle.getMessage(ParameterTypePanel.class, "TypePanel.browseButton.text")); // NOI18N
+            javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
+            this.setLayout(layout);
+            layout.setHorizontalGroup(
+                    layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                    .addContainerGap()
+                                    .addComponent(typeParameterTypeTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addComponent(browseButton)
+                                    .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            );
+            layout.setVerticalGroup(
+                    layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                    .addContainerGap()
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                            .addComponent(typeParameterTypeTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addComponent(browseButton))
+                                    .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            );
+        }// </editor-fold>
+        // Variables declaration - do not modify
+        private javax.swing.JButton browseButton;
+        protected javax.swing.JTextField typeParameterTypeTextField;
+        // End of variables declaration
+    }
+
+    private class ThrowingTypePanel extends javax.swing.JPanel {
+
+        private ThrowingTypePanel() {
+            initComponents();
+            browseButton.addActionListener(this::browseButtonActionPerformed);
+        }
+
+        private void browseButtonActionPerformed(java.awt.event.ActionEvent evt) {
+            ElementHandle<TypeElement> handle = TypeElementFinder.find(null, null, null);
+            if (handle != null) {
+                throwingTypeTextField.setText(handle.getQualifiedName());
+                TableCellEditor cellEditor = throwsTable.getCellEditor();
+                if (cellEditor != null) {
+                    cellEditor.stopCellEditing();
+                }
+            }
+        }
+
+        void updateTypeValue(String type) {
+            throwingTypeTextField.setText(type);
+        }
+
+        /**
+         * This method is called from within the constructor to
+         * initialize the form.
+         * WARNING: Do NOT modify this code. The content of this method is
+         * always regenerated by the Form Editor.
+         */
+        @SuppressWarnings("unchecked")
+        // <editor-fold defaultstate="collapsed" desc="Generated Code">
+        private void initComponents() {
+            throwingTypeTextField = new javax.swing.JTextField();
+            browseButton = new javax.swing.JButton();
+            Mnemonics.setLocalizedText(
+                    browseButton, org.openide.util.NbBundle.getMessage(ParameterTypePanel.class, "TypePanel.browseButton.text")); // NOI18N
+            javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
+            this.setLayout(layout);
+            layout.setHorizontalGroup(
+                    layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                    .addContainerGap()
+                                    .addComponent(throwingTypeTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addComponent(browseButton)
+                                    .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            );
+            layout.setVerticalGroup(
+                    layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                    .addContainerGap()
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                            .addComponent(throwingTypeTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addComponent(browseButton))
+                                    .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            );
+        }// </editor-fold>
+        // Variables declaration - do not modify
+        private javax.swing.JButton browseButton;
+        protected javax.swing.JTextField throwingTypeTextField;
+        // End of variables declaration
+    }
+
+    private class TypeRenderer extends GenerateMethodPanel.ParameterTypePanel implements TableCellRenderer {
 
         private TypeRenderer() {
             super();
@@ -907,17 +1038,10 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
         }
     }
 
-    private class TypeEditor extends GenerateMethodPanel.TypePanel implements TableCellEditor {
+    private class ParameterTypeEditor extends ParameterTypePanel implements TableCellEditor {
 
         protected transient ChangeEvent changeEvent;
-        private final Border originalBorder = parameterTypeTextField.getBorder();
-        private final boolean emptyAllowed;
-        private final JTable owner;
-
-        public TypeEditor(boolean emptyAllowed, JTable owner) {
-            this.emptyAllowed = emptyAllowed;
-            this.owner = owner;
-        }
+        protected final Border originalBorder = parameterTypeTextField.getBorder();
 
         @Override
         public Component getTableCellEditorComponent(
@@ -944,7 +1068,7 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
 
         @Override
         public boolean stopCellEditing() {
-            InputVerifier verifier = new TypeVerifier(emptyAllowed);
+            InputVerifier verifier = new TypeVerifier(false);
             if (!(verifier.verify(parameterTypeTextField))) {
                 parameterTypeTextField.setBorder(new LineBorder(Color.red));
                 parameterTypeTextField.selectAll();
@@ -955,12 +1079,188 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
             }
             parameterTypeTextField.setBorder(originalBorder);
             fireEditingStopped();
-            if (owner.equals(parametersTable)) {
-                String parameterName = suggestParameterName(parameterTypeTextField.getText());
-                int selectedRow = parametersTable.getSelectedRow();
-                int parameterNameColumn = 2;
-                parametersTableModel.setValueAt(parameterName, selectedRow, parameterNameColumn);
+            String parameterName = suggestParameterName(parameterTypeTextField.getText());
+            int selectedRow = parametersTable.getSelectedRow();
+            int parameterNameColumn = 2;
+            parametersTableModel.setValueAt(parameterName, selectedRow, parameterNameColumn);
+            dialogDescriptor.setValid(valid());
+            return true;
+        }
+
+        @Override
+        public void cancelCellEditing() {
+            fireEditingCanceled();
+        }
+
+        @Override
+        public void addCellEditorListener(CellEditorListener l) {
+            listenerList.add(CellEditorListener.class, l);
+        }
+
+        @Override public void removeCellEditorListener(CellEditorListener l) {
+            listenerList.remove(CellEditorListener.class, l);
+        }
+
+        public CellEditorListener[] getCellEditorListeners() {
+            return listenerList.getListeners(CellEditorListener.class);
+        }
+
+        protected void fireEditingStopped() {
+            Object[] listeners = listenerList.getListenerList();
+            for (int i = listeners.length - 2; i >= 0; i -= 2) {
+                if (listeners[i] == CellEditorListener.class) {
+                    if (Objects.isNull(changeEvent)) {
+                        changeEvent = new ChangeEvent(this);
+                    }
+                    ((CellEditorListener) listeners[i + 1]).editingStopped(changeEvent);
+                }
             }
+        }
+
+        protected void fireEditingCanceled() {
+            Object[] listeners = listenerList.getListenerList();
+            for (int i = listeners.length - 2; i >= 0; i -= 2) {
+                if (listeners[i] == CellEditorListener.class) {
+                    // Lazily create the event:
+                    if (Objects.isNull(changeEvent)) {
+                        changeEvent = new ChangeEvent(this);
+                    }
+                    ((CellEditorListener) listeners[i + 1]).editingCanceled(changeEvent);
+                }
+            }
+        }
+    }
+
+    private class TypeParameterTypeEditor extends TypeParameterTypePanel implements TableCellEditor {
+
+        protected transient ChangeEvent changeEvent;
+        protected final Border originalBorder = typeParameterTypeTextField.getBorder();
+
+        @Override
+        public Component getTableCellEditorComponent(
+                JTable table, Object value, boolean isSelected, int row, int column) {
+            this.setBackground(table.getSelectionBackground());
+            updateTypeValue((String) value);
+            return this;
+        }
+
+        @Override
+        public Object getCellEditorValue() {
+            return typeParameterTypeTextField.getText();
+        }
+
+        @Override
+        public boolean isCellEditable(EventObject e) {
+            return true;
+        }
+
+        @Override
+        public boolean shouldSelectCell(EventObject anEvent) {
+            return true;
+        }
+
+        @Override
+        public boolean stopCellEditing() {
+            InputVerifier verifier = new TypeVerifier(true);
+            if (!(verifier.verify(typeParameterTypeTextField))) {
+                typeParameterTypeTextField.setBorder(new LineBorder(Color.red));
+                typeParameterTypeTextField.selectAll();
+                typeParameterTypeTextField.requestFocusInWindow();
+                fireEditingStopped();
+                dialogDescriptor.setValid(false);
+                return false;
+            }
+            typeParameterTypeTextField.setBorder(originalBorder);
+            fireEditingStopped();
+            dialogDescriptor.setValid(valid());
+            return true;
+        }
+
+        @Override
+        public void cancelCellEditing() {
+            fireEditingCanceled();
+        }
+
+        @Override
+        public void addCellEditorListener(CellEditorListener l) {
+            listenerList.add(CellEditorListener.class, l);
+        }
+
+        @Override public void removeCellEditorListener(CellEditorListener l) {
+            listenerList.remove(CellEditorListener.class, l);
+        }
+
+        public CellEditorListener[] getCellEditorListeners() {
+            return listenerList.getListeners(CellEditorListener.class);
+        }
+
+        protected void fireEditingStopped() {
+            Object[] listeners = listenerList.getListenerList();
+            for (int i = listeners.length - 2; i >= 0; i -= 2) {
+                if (listeners[i] == CellEditorListener.class) {
+                    if (Objects.isNull(changeEvent)) {
+                        changeEvent = new ChangeEvent(this);
+                    }
+                    ((CellEditorListener) listeners[i + 1]).editingStopped(changeEvent);
+                }
+            }
+        }
+
+        protected void fireEditingCanceled() {
+            Object[] listeners = listenerList.getListenerList();
+            for (int i = listeners.length - 2; i >= 0; i -= 2) {
+                if (listeners[i] == CellEditorListener.class) {
+                    // Lazily create the event:
+                    if (Objects.isNull(changeEvent)) {
+                        changeEvent = new ChangeEvent(this);
+                    }
+                    ((CellEditorListener) listeners[i + 1]).editingCanceled(changeEvent);
+                }
+            }
+        }
+    }
+
+    private class ThrowingTypeEditor extends ThrowingTypePanel implements TableCellEditor {
+
+        protected transient ChangeEvent changeEvent;
+        protected final Border originalBorder = throwingTypeTextField.getBorder();
+
+        @Override
+        public Component getTableCellEditorComponent(
+                JTable table, Object value, boolean isSelected, int row, int column) {
+            this.setBackground(table.getSelectionBackground());
+            updateTypeValue((String) value);
+            return this;
+        }
+
+        @Override
+        public Object getCellEditorValue() {
+            return throwingTypeTextField.getText();
+        }
+
+        @Override
+        public boolean isCellEditable(EventObject e) {
+            return true;
+        }
+
+        @Override
+        public boolean shouldSelectCell(EventObject anEvent) {
+            return true;
+        }
+
+        @Override
+        public boolean stopCellEditing() {
+            InputVerifier verifier = new TypeVerifier(false);
+            if (!(verifier.verify(throwingTypeTextField))) {
+                throwingTypeTextField.setBorder(new LineBorder(Color.red));
+                throwingTypeTextField.selectAll();
+                throwingTypeTextField.requestFocusInWindow();
+                fireEditingStopped();
+                dialogDescriptor.setValid(false);
+                return false;
+            }
+            throwingTypeTextField.setBorder(originalBorder);
+            fireEditingStopped();
             dialogDescriptor.setValid(valid());
             return true;
         }
