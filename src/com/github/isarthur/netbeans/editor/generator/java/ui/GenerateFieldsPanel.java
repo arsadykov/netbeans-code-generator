@@ -271,6 +271,7 @@ public class GenerateFieldsPanel extends javax.swing.JPanel {
 
     void setDialogDescriptor(DialogDescriptor dialogDescriptor) {
         this.dialogDescriptor = dialogDescriptor;
+        addFieldButtonActionPerformed(null);
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addFieldButton;
