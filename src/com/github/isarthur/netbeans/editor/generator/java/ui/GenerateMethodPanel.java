@@ -1319,8 +1319,10 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
 
         @Override
         public boolean verify(JComponent input) {
-            String text = ((JTextField) input).getText();
-            return emptyAllowed ? text.matches(TYPE_REGEX_EMPTY_ALLOWED) : text.matches(TYPE_REGEX);
+            JTextField typeTextField = (JTextField) input;
+            String type = typeTextField.getText().trim();
+            typeTextField.setText(type);
+            return emptyAllowed ? type.matches(TYPE_REGEX_EMPTY_ALLOWED) : type.matches(TYPE_REGEX);
         }
     }
 
@@ -1328,8 +1330,10 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
 
         @Override
         public boolean verify(JComponent input) {
-            String text = ((JTextField) input).getText();
-            return text.matches(NAME_REGEX);
+            JTextField nameTextField = (JTextField) input;
+            String name = nameTextField.getText().trim();
+            nameTextField.setText(name);
+            return name.matches(NAME_REGEX);
         }
     }
 

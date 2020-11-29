@@ -483,8 +483,10 @@ public class GenerateFieldsPanel extends javax.swing.JPanel {
 
         @Override
         public boolean verify(JComponent input) {
-            String text = ((JTextField) input).getText();
-            return text.matches(TYPE_REGEX);
+            JTextField typeTextField = (JTextField) input;
+            String type = typeTextField.getText().trim();
+            typeTextField.setText(type);
+            return type.matches(TYPE_REGEX);
         }
     }
 
@@ -492,8 +494,10 @@ public class GenerateFieldsPanel extends javax.swing.JPanel {
 
         @Override
         public boolean verify(JComponent input) {
-            String text = ((JTextField) input).getText();
-            return text.matches(NAME_REGEX);
+            JTextField nameTextField = (JTextField) input;
+            String name = nameTextField.getText().trim();
+            nameTextField.setText(name);
+            return name.matches(NAME_REGEX);
         }
     }
 }
