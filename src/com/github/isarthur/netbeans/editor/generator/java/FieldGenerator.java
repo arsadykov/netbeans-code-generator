@@ -19,7 +19,6 @@ import com.github.isarthur.netbeans.editor.generator.java.ui.GenerateFieldsDialo
 import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.CompilationUnitTree;
 import com.sun.source.tree.Tree;
-import com.sun.source.tree.Tree.Kind;
 import com.sun.source.util.SourcePositions;
 import com.sun.source.util.TreePath;
 import com.sun.source.util.Trees;
@@ -100,11 +99,12 @@ public class FieldGenerator implements CodeGenerator {
                     trees = workingCopy.getTrees();
                     treeUtilities = workingCopy.getTreeUtilities();
                     currentPath = treeUtilities.pathFor(caretPosition);
-                    TreePath classPath = treeUtilities.getPathElementOfKind(Tree.Kind.CLASS, currentPath);
-                    if (classPath == null) {
+                    TreePath classOrInterfacePath =
+                            treeUtilities.getPathElementOfKind(Set.of(Tree.Kind.CLASS, Tree.Kind.INTERFACE), currentPath);
+                    if (classOrInterfacePath == null) {
                         return;
                     }
-                    ClassTree oldTree = (ClassTree) classPath.getLeaf();
+                    ClassTree oldTree = (ClassTree) classOrInterfacePath.getLeaf();
                     setInsertIndex(oldTree);
                     insertFieldsIntoClass(workingCopy);
                 }).commit();
@@ -117,8 +117,8 @@ public class FieldGenerator implements CodeGenerator {
     }
 
     private void insertFieldsIntoClass(WorkingCopy workingCopy) {
-        ClassTree oldClassTree = getClassTree(workingCopy);
-        ClassTree newClassTree = oldClassTree;
+        ClassTree oldClassOrInterfaceTree = getClassOrInterfaceTree(workingCopy);
+        ClassTree newClassOrInterfaceTree = oldClassOrInterfaceTree;
         TreeMaker make = workingCopy.getTreeMaker();
         List<?> data = dialog.getData();
         int numberOfRows = data.size();
@@ -158,8 +158,8 @@ public class FieldGenerator implements CodeGenerator {
             String fieldType = (String) ((List) data.get(row)).get(5);
             String fieldName = (String) ((List) data.get(row)).get(6);
             String fieldValue = (String) ((List) data.get(row)).get(7);
-            newClassTree = make.insertClassMember(
-                    newClassTree,
+            newClassOrInterfaceTree = make.insertClassMember(
+                    newClassOrInterfaceTree,
                     insertIndex + row,
                     make.Variable(
                             make.Modifiers(modifiers),
@@ -167,15 +167,16 @@ public class FieldGenerator implements CodeGenerator {
                             make.QualIdent(fieldType),
                             fieldValue.isEmpty() ? null : make.Identifier(fieldValue)));
         }
-        workingCopy.rewrite(oldClassTree, newClassTree);
+        workingCopy.rewrite(oldClassOrInterfaceTree, newClassOrInterfaceTree);
     }
 
-    private ClassTree getClassTree(WorkingCopy workingCopy) {
-        TreePath classPath = workingCopy.getTreeUtilities().getPathElementOfKind(Kind.CLASS, currentPath);
-        if (classPath == null) {
-            throw new IllegalStateException("No class in the java file!"); //NOI18N
+    private ClassTree getClassOrInterfaceTree(WorkingCopy workingCopy) {
+        TreePath classOrInterfacePath = workingCopy.getTreeUtilities()
+                .getPathElementOfKind(Set.of(Tree.Kind.CLASS, Tree.Kind.INTERFACE), currentPath);
+        if (classOrInterfacePath == null) {
+            throw new IllegalStateException("No class or interface in the java file!"); //NOI18N
         }
-        return (ClassTree) classPath.getLeaf();
+        return (ClassTree) classOrInterfacePath.getLeaf();
     }
 
     private void setInsertIndex(ClassTree classTree) {
