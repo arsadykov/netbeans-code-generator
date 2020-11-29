@@ -302,7 +302,10 @@ public class MethodGenerator implements CodeGenerator {
                     long previousStartPosition = sourcePositions.getStartPosition(compilationUnit, previousMember);
                     Tree currentMember = members.get(i);
                     long currentStartPosition = sourcePositions.getStartPosition(compilationUnit, currentMember);
-                    if (i < size - 1) {
+                    if (i == 1 && caretPosition < previousStartPosition) {
+                        insertIndex = i - 1;
+                        break;
+                    } else if (i < size - 1) {
                         if (previousStartPosition < caretPosition && caretPosition < currentStartPosition) {
                             insertIndex = i;
                             break;
