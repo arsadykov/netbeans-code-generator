@@ -17,6 +17,9 @@ package com.github.isarthur.netbeans.editor.generator.java.ui;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.lang.reflect.TypeVariable;
 import java.util.EventObject;
 import java.util.List;
 import java.util.Locale;
@@ -30,6 +33,7 @@ import javax.swing.JComponent;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import javax.swing.event.CellEditorListener;
@@ -104,6 +108,18 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
         parametersTableModel = (DefaultTableModel) parametersTable.getModel();
         typeParametersTableModel = (DefaultTableModel) typeParametersTable.getModel();
         throwsTableModel = (DefaultTableModel) throwsTable.getModel();
+        parametersTable.putClientProperty("terminateEditOnFocusLost", Boolean.TRUE); //NOI18N
+        typeParametersTable.putClientProperty("terminateEditOnFocusLost", Boolean.TRUE); //NOI18N
+        throwsTable.putClientProperty("terminateEditOnFocusLost", Boolean.TRUE); //NOI18N
+        typeTextField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    SwingUtilities.invokeLater(() -> nameTextField.requestFocusInWindow());
+                }
+            }
+        });
+        SwingUtilities.invokeLater(() -> typeTextField.requestFocusInWindow());
     }
 
     public static GenerateMethodPanel create(boolean isClass) {
@@ -197,6 +213,7 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
         typeTextField.setText(org.openide.util.NbBundle.getMessage(GenerateMethodPanel.class, "GenerateMethodPanel.typeTextField.text")); // NOI18N
 
         org.openide.awt.Mnemonics.setLocalizedText(browseButton, org.openide.util.NbBundle.getMessage(GenerateMethodPanel.class, "GenerateMethodPanel.browseButton.text")); // NOI18N
+        browseButton.setFocusable(false);
         browseButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 browseButtonActionPerformed(evt);
@@ -250,9 +267,12 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
                     return false;
                 }
                 parameterNameTextField.setBorder(originalBorder);
-                boolean result = super.stopCellEditing();
+                boolean editingStopped = super.stopCellEditing();
+                if (editingStopped) {
+                    SwingUtilities.invokeLater(() -> addParameterButton.requestFocusInWindow());
+                }
                 dialogDescriptor.setValid(valid());
-                return result;
+                return editingStopped;
             }
         });
         nameColumn.setPreferredWidth(200);
@@ -309,9 +329,12 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
                     return false;
                 }
                 typeParameterNameTextField.setBorder(originalBorder);
-                boolean result = super.stopCellEditing();
+                boolean editingStopped = super.stopCellEditing();
+                if (editingStopped) {
+                    requestFocusInTypeParametersTableCell();
+                }
                 dialogDescriptor.setValid(valid());
-                return result;
+                return editingStopped;
             }
         });
         typeParameterNameTableColumn.setPreferredWidth(75);
@@ -554,6 +577,14 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
         ElementHandle<TypeElement> handle = TypeElementFinder.find(null, null, null);
         if (handle != null) {
             typeTextField.setText(handle.getQualifiedName());
+            try {
+                Class<?> clazz = Class.forName(handle.getQualifiedName());
+                boolean generic = clazz.getTypeParameters().length > 0;
+                if (!generic) {
+                    nameTextField.requestFocusInWindow();
+                }
+            } catch (ClassNotFoundException ex) {
+            }
         }
     }//GEN-LAST:event_browseButtonActionPerformed
 
@@ -645,8 +676,11 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
             EMPTY_STRING,
             EMPTY_STRING
         });
-        int row = parametersTable.convertRowIndexToView(parametersTableModel.getRowCount() - 1);
-        parametersTable.getSelectionModel().setSelectionInterval(row, row);
+        parametersTable.getSelectionModel().setSelectionInterval(
+                parametersTable.getRowCount() - 1, parametersTable.getRowCount() - 1);
+        parametersTable.editCellAt(parametersTable.getSelectedRow(), 1);
+        parametersTable.setSurrendersFocusOnKeystroke(true);
+        SwingUtilities.invokeLater(() -> parametersTable.getEditorComponent().requestFocusInWindow());
     }
 
     private void removeRowFromParametersTable() {
@@ -667,8 +701,11 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
             EMPTY_STRING,
             EMPTY_STRING
         });
-        int row = parametersTable.convertRowIndexToView(parametersTableModel.getRowCount() - 1);
-        parametersTable.getSelectionModel().setSelectionInterval(row, row);
+        typeParametersTable.getSelectionModel().setSelectionInterval(
+                typeParametersTable.getRowCount() - 1, typeParametersTable.getRowCount() - 1);
+        typeParametersTable.editCellAt(typeParametersTable.getSelectedRow(), 0);
+        typeParametersTable.setSurrendersFocusOnKeystroke(true);
+        SwingUtilities.invokeLater(() -> typeParametersTable.getEditorComponent().requestFocusInWindow());
     }
 
     private void removeRowFromTypeParametersTable() {
@@ -688,8 +725,11 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
         throwsTableModel.addRow(new Object[]{
             EMPTY_STRING
         });
-        int row = throwsTable.convertRowIndexToView(throwsTableModel.getRowCount() - 1);
-        throwsTable.getSelectionModel().setSelectionInterval(row, row);
+        throwsTable.getSelectionModel().setSelectionInterval(
+                throwsTable.getRowCount() - 1, throwsTable.getRowCount() - 1);
+        throwsTable.editCellAt(throwsTable.getSelectedRow(), 0);
+        throwsTable.setSurrendersFocusOnKeystroke(true);
+        SwingUtilities.invokeLater(() -> throwsTable.getEditorComponent().requestFocusInWindow());
     }
 
     private void removeRowFromThrowsTable() {
@@ -803,6 +843,18 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
     List<?> getMethodThrownTypes() {
         return throwsTableModel.getDataVector();
     }
+
+    private void requestFocusInParametersTableCell() {
+        parametersTable.editCellAt(parametersTable.getSelectedRow(), 2);
+        parametersTable.setSurrendersFocusOnKeystroke(true);
+        SwingUtilities.invokeLater(() -> parametersTable.getEditorComponent().requestFocusInWindow());
+    }
+
+    private void requestFocusInTypeParametersTableCell() {
+        typeParametersTable.editCellAt(typeParametersTable.getSelectedRow(), 1);
+        typeParametersTable.setSurrendersFocusOnKeystroke(true);
+        SwingUtilities.invokeLater(() -> typeParametersTable.getEditorComponent().requestFocusInWindow());
+    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox abstractCheckBox;
     private javax.swing.JComboBox<String> accessComboBox;
@@ -845,10 +897,9 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
             ElementHandle<TypeElement> handle = TypeElementFinder.find(null, null, null);
             if (handle != null) {
                 parameterTypeTextField.setText(handle.getQualifiedName());
-                TableCellEditor cellEditor = parametersTable.getCellEditor();
-                if (cellEditor != null) {
-                    cellEditor.stopCellEditing();
-                }
+                String parameterName = suggestParameterName(handle.getQualifiedName());
+                parametersTableModel.setValueAt(parameterName, parametersTable.getSelectedRow(), 2);
+                requestFocusInParametersTableCell();
             }
         }
 
@@ -910,10 +961,7 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
             ElementHandle<TypeElement> handle = TypeElementFinder.find(null, null, null);
             if (handle != null) {
                 typeParameterTypeTextField.setText(handle.getQualifiedName());
-                TableCellEditor cellEditor = typeParametersTable.getCellEditor();
-                if (cellEditor != null) {
-                    cellEditor.stopCellEditing();
-                }
+                SwingUtilities.invokeLater(() -> addTypeParameterButton.requestFocusInWindow());
             }
         }
 
@@ -972,10 +1020,7 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
             ElementHandle<TypeElement> handle = TypeElementFinder.find(null, null, null);
             if (handle != null) {
                 throwingTypeTextField.setText(handle.getQualifiedName());
-                TableCellEditor cellEditor = throwsTable.getCellEditor();
-                if (cellEditor != null) {
-                    cellEditor.stopCellEditing();
-                }
+                SwingUtilities.invokeLater(() -> addThrownTypeButton.requestFocusInWindow());
             }
         }
 
@@ -1083,6 +1128,7 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
             int selectedRow = parametersTable.getSelectedRow();
             int parameterNameColumn = 2;
             parametersTableModel.setValueAt(parameterName, selectedRow, parameterNameColumn);
+            requestFocusInParametersTableCell();
             dialogDescriptor.setValid(valid());
             return true;
         }
@@ -1172,6 +1218,7 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
             }
             typeParameterTypeTextField.setBorder(originalBorder);
             fireEditingStopped();
+            SwingUtilities.invokeLater(() -> addTypeParameterButton.requestFocusInWindow());
             dialogDescriptor.setValid(valid());
             return true;
         }
@@ -1261,6 +1308,7 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
             }
             throwingTypeTextField.setBorder(originalBorder);
             fireEditingStopped();
+            SwingUtilities.invokeLater(() -> addThrownTypeButton.requestFocusInWindow());
             dialogDescriptor.setValid(valid());
             return true;
         }

@@ -31,6 +31,7 @@ import javax.swing.JComponent;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import javax.swing.event.CellEditorListener;
@@ -78,6 +79,7 @@ public class GenerateFieldsPanel extends javax.swing.JPanel {
             removeFieldButton.setEnabled(!selectionModel.isSelectionEmpty());
         });
         fieldsTableModel = (DefaultTableModel) fieldsTable.getModel();
+        fieldsTable.putClientProperty("terminateEditOnFocusLost", Boolean.TRUE); //NOI18N
     }
 
     public static GenerateFieldsPanel create() {
@@ -157,13 +159,28 @@ public class GenerateFieldsPanel extends javax.swing.JPanel {
                     return false;
                 }
                 nameTextField.setBorder(originalBorder);
-                boolean result = super.stopCellEditing();
+                boolean editingStopped = super.stopCellEditing();
+                if (editingStopped) {
+                    requestFocusInTableCell(7);
+                }
                 dialogDescriptor.setValid(valid());
-                return result;
+                return editingStopped;
             }
         });
         nameColumn.setPreferredWidth(200);
+        JTextField valueTextField = new JTextField();
         TableColumn valueColumn = fieldsTable.getColumnModel().getColumn(7);
+        valueColumn.setCellEditor(new DefaultCellEditor(valueTextField) {
+
+            @Override
+            public boolean stopCellEditing() {
+                boolean editingStopped = super.stopCellEditing();
+                if (editingStopped) {
+                    SwingUtilities.invokeLater(() -> addFieldButton.requestFocusInWindow());
+                }
+                return editingStopped;
+            }
+        });
         valueColumn.setPreferredWidth(200);
         fieldsScrollPane.setViewportView(fieldsTable);
 
@@ -269,17 +286,15 @@ public class GenerateFieldsPanel extends javax.swing.JPanel {
         return fieldsTableModel.getDataVector();
     }
 
-    void stopTablesEditing() {
-        TableCellEditor cellEditor = fieldsTable.getCellEditor();
-        if (cellEditor == null) {
-            return;
-        }
-        cellEditor.stopCellEditing();
-    }
-
     void setDialogDescriptor(DialogDescriptor dialogDescriptor) {
         this.dialogDescriptor = dialogDescriptor;
         addFieldButtonActionPerformed(null);
+    }
+
+    private void requestFocusInTableCell(int column) {
+        fieldsTable.editCellAt(fieldsTable.getSelectedRow(), column);
+        fieldsTable.setSurrendersFocusOnKeystroke(true);
+        SwingUtilities.invokeLater(() -> fieldsTable.getEditorComponent().requestFocusInWindow());
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addFieldButton;
@@ -301,10 +316,7 @@ public class GenerateFieldsPanel extends javax.swing.JPanel {
             ElementHandle<TypeElement> handle = TypeElementFinder.find(null, null, null);
             if (handle != null) {
                 typeTextField.setText(handle.getQualifiedName());
-                TableCellEditor cellEditor = fieldsTable.getCellEditor();
-                if (cellEditor != null) {
-                    cellEditor.stopCellEditing();
-                }
+                requestFocusInTableCell(6);
             }
         }
 
@@ -412,6 +424,7 @@ public class GenerateFieldsPanel extends javax.swing.JPanel {
             int selectedRow = fieldsTable.getSelectedRow();
             int fieldNameColumn = 6;
             fieldsTableModel.setValueAt(fieldName, selectedRow, fieldNameColumn);
+            requestFocusInTableCell(fieldNameColumn);
             dialogDescriptor.setValid(valid());
             return true;
         }

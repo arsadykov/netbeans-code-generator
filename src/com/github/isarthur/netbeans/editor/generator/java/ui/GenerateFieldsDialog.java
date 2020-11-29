@@ -63,10 +63,6 @@ public class GenerateFieldsDialog {
         return dialogDescriptor.getValue() == DialogDescriptor.OK_OPTION;
     }
 
-    public void stopTablesEditing() {
-        generateFieldsPanel.stopTablesEditing();
-    }
-
     public void dispose() {
         dialog.dispose();
     }
