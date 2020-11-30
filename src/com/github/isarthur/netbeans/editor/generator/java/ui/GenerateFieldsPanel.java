@@ -110,30 +110,14 @@ public class GenerateFieldsPanel extends javax.swing.JPanel {
 
         fieldsTable.setRowHeight(30);
         fieldsTable.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-
-            },
+            new Object [][] {},
             new String [] {
                 "access", "static", "final", "transient", "volatile", "type", "name", "value"
             }
         ) {
             Class<?>[] types = new Class<?>[] {
-                java.lang.String.class
-
-                , java.lang.Boolean.class
-
-                , java.lang.Boolean.class
-
-                , java.lang.Boolean.class
-
-                , java.lang.Boolean.class
-
-                , java.lang.Object.class
-
-                , java.lang.String.class
-
-                , java.lang.Object.class
-            };
+                java.lang.String.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Boolean.class,
+                java.lang.Boolean.class, java.lang.Object.class, java.lang.String.class, java.lang.Object.class};
 
             public Class<?> getColumnClass(int columnIndex) {
                 return types[columnIndex];
@@ -145,41 +129,22 @@ public class GenerateFieldsPanel extends javax.swing.JPanel {
         fieldsTable.setShowGrid(false);
         TableColumn accessColumn = fieldsTable.getColumnModel().getColumn(0);
         JComboBox<String> accessComboBox = new JComboBox<>(ACCESS_MODIFIERS);
-
-        accessColumn.setCellEditor (
-
-            new DefaultCellEditor(accessComboBox));
-        accessColumn.setPreferredWidth (
-            50);
+        accessColumn.setCellEditor (new DefaultCellEditor(accessComboBox));
+        accessColumn.setPreferredWidth(50);
         TableColumn staticColumn = fieldsTable.getColumnModel().getColumn(1);
-
-        staticColumn.setPreferredWidth (
-            50);
+        staticColumn.setPreferredWidth(50);
         TableColumn finalColumn = fieldsTable.getColumnModel().getColumn(2);
-
-        finalColumn.setPreferredWidth (
-            50);
+        finalColumn.setPreferredWidth(50);
         TableColumn transitiveColumn = fieldsTable.getColumnModel().getColumn(3);
-
-        transitiveColumn.setPreferredWidth (
-            75);
+        transitiveColumn.setPreferredWidth(75);
         TableColumn volatileColumn = fieldsTable.getColumnModel().getColumn(4);
-
-        volatileColumn.setPreferredWidth (
-            50);
+        volatileColumn.setPreferredWidth(50);
         TableColumn typeColumn = fieldsTable.getColumnModel().getColumn(5);
-
-        typeColumn.setCellEditor (
-
-            new TypeEditor());
-        typeColumn.setCellRenderer (
-
-            new TypeRenderer());
-        typeColumn.setPreferredWidth (
-            350);
+        typeColumn.setCellEditor(new TypeEditor());
+        typeColumn.setCellRenderer(new TypeRenderer());
+        typeColumn.setPreferredWidth(350);
         TableColumn nameColumn = fieldsTable.getColumnModel().getColumn(6);
         JTextField nameTextField = new JTextField();
-
         nameColumn.setCellEditor ( new DefaultCellEditor(nameTextField) {
             private final Border originalBorder = nameTextField.getBorder();
 
@@ -203,27 +168,31 @@ public class GenerateFieldsPanel extends javax.swing.JPanel {
                     fieldsTable.editCellAt(selectedRow, fieldValueColumn);
                     JTextField editorComponent = (JTextField) fieldsTable.getEditorComponent();
                     if (editorComponent != null) {
+                        boolean isFinal = (boolean) fieldsTable.getValueAt(selectedRow, 2);
+                        if (isFinal) {
+                            String type = (String) fieldsTable.getValueAt(selectedRow, 5);
+                            if (type.equals("String") || type.equals("java.lang.String")) {
+                                editorComponent.setText("\"\"");
+                                editorComponent.setCaretPosition(1);
+                            } else if (type.equals("boolean") || type.equals("java.lang.Boolean")) {
+                                editorComponent.setText("false");
+                                editorComponent.selectAll();
+                            }
+                        }
                         editorComponent.requestFocusInWindow();
                     }
                 }
                 dialogDescriptor.setValid(valid());
                 return editingStopped;
             }
-        }
-
-    );
-    nameColumn.setPreferredWidth (
-        200);
-    JTextField valueTextField = new JTextField();
-    TableColumn valueColumn = fieldsTable.getColumnModel().getColumn(7);
-
-    valueColumn.setCellEditor (
-        new DefaultCellEditor(valueTextField) {
+        });
+        nameColumn.setPreferredWidth(200);
+        JTextField valueTextField = new JTextField();
+        TableColumn valueColumn = fieldsTable.getColumnModel().getColumn(7);
+        valueColumn.setCellEditor(new DefaultCellEditor(valueTextField) {
 
             @Override
-            public boolean stopCellEditing
-
-            () {
+            public boolean stopCellEditing() {
                 boolean editingStopped = super.stopCellEditing();
                 if (editingStopped) {
                     SwingUtilities.invokeLater(() -> {
@@ -233,51 +202,47 @@ public class GenerateFieldsPanel extends javax.swing.JPanel {
                 }
                 return editingStopped;
             }
-        }
+        });
+        valueColumn.setPreferredWidth(200);
+        fieldsScrollPane.setViewportView(fieldsTable);
 
-    );
-    valueColumn.setPreferredWidth (
+        org.openide.awt.Mnemonics.setLocalizedText(removeFieldButton, org.openide.util.NbBundle.getMessage(GenerateFieldsPanel.class, "GenerateFieldsPanel.removeFieldButton.text")); // NOI18N
+        removeFieldButton.setEnabled(false);
+        removeFieldButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                removeFieldButtonActionPerformed(evt);
+            }
+        });
 
-        200);
-    fieldsScrollPane.setViewportView(fieldsTable);
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
+        this.setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(addFieldButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(removeFieldButton)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(fieldsScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 988, Short.MAX_VALUE))
+                .addContainerGap())
+        );
 
-    org.openide.awt.Mnemonics.setLocalizedText(removeFieldButton, org.openide.util.NbBundle.getMessage(GenerateFieldsPanel.class, "GenerateFieldsPanel.removeFieldButton.text")); // NOI18N
-    removeFieldButton.setEnabled(false);
-    removeFieldButton.addActionListener(new java.awt.event.ActionListener() {
-        public void actionPerformed(java.awt.event.ActionEvent evt) {
-            removeFieldButtonActionPerformed(evt);
-        }
-    });
+        layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {addFieldButton, removeFieldButton});
 
-    javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-    this.setLayout(layout);
-    layout.setHorizontalGroup(
-        layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-        .addGroup(layout.createSequentialGroup()
-            .addContainerGap()
-            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(layout.createSequentialGroup()
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(fieldsScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 302, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(addFieldButton)
-                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                    .addComponent(removeFieldButton)
-                    .addGap(0, 0, Short.MAX_VALUE))
-                .addComponent(fieldsScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 988, Short.MAX_VALUE))
-            .addContainerGap())
-    );
-
-    layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {addFieldButton, removeFieldButton});
-
-    layout.setVerticalGroup(
-        layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-        .addGroup(layout.createSequentialGroup()
-            .addContainerGap()
-            .addComponent(fieldsScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 302, Short.MAX_VALUE)
-            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                .addComponent(addFieldButton)
-                .addComponent(removeFieldButton))
-            .addContainerGap())
-    );
+                    .addComponent(removeFieldButton))
+                .addContainerGap())
+        );
     }// </editor-fold>//GEN-END:initComponents
 
     private void addFieldButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addFieldButtonActionPerformed
