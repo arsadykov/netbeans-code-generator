@@ -118,33 +118,69 @@ public class GenerateFieldsPanel extends javax.swing.JPanel {
             }
         ) {
             Class<?>[] types = new Class<?>[] {
-                java.lang.String.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Object.class, java.lang.String.class, java.lang.Object.class
+                java.lang.String.class
+
+                , java.lang.Boolean.class
+
+                , java.lang.Boolean.class
+
+                , java.lang.Boolean.class
+
+                , java.lang.Boolean.class
+
+                , java.lang.Object.class
+
+                , java.lang.String.class
+
+                , java.lang.Object.class
             };
 
             public Class<?> getColumnClass(int columnIndex) {
-                return types [columnIndex];
+                return types[columnIndex];
             }
         });
-        fieldsTable.setEnabled(false);
+        fieldsTable.setCellSelectionEnabled(true);
+        fieldsTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        fieldsTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        fieldsTable.setShowGrid(false);
         TableColumn accessColumn = fieldsTable.getColumnModel().getColumn(0);
         JComboBox<String> accessComboBox = new JComboBox<>(ACCESS_MODIFIERS);
-        accessColumn.setCellEditor(new DefaultCellEditor(accessComboBox));
-        accessColumn.setPreferredWidth(50);
+
+        accessColumn.setCellEditor (
+
+            new DefaultCellEditor(accessComboBox));
+        accessColumn.setPreferredWidth (
+            50);
         TableColumn staticColumn = fieldsTable.getColumnModel().getColumn(1);
-        staticColumn.setPreferredWidth(50);
+
+        staticColumn.setPreferredWidth (
+            50);
         TableColumn finalColumn = fieldsTable.getColumnModel().getColumn(2);
-        finalColumn.setPreferredWidth(50);
+
+        finalColumn.setPreferredWidth (
+            50);
         TableColumn transitiveColumn = fieldsTable.getColumnModel().getColumn(3);
-        transitiveColumn.setPreferredWidth(75);
+
+        transitiveColumn.setPreferredWidth (
+            75);
         TableColumn volatileColumn = fieldsTable.getColumnModel().getColumn(4);
-        volatileColumn.setPreferredWidth(50);
+
+        volatileColumn.setPreferredWidth (
+            50);
         TableColumn typeColumn = fieldsTable.getColumnModel().getColumn(5);
-        typeColumn.setCellEditor(new TypeEditor());
-        typeColumn.setCellRenderer(new TypeRenderer());
-        typeColumn.setPreferredWidth(350);
+
+        typeColumn.setCellEditor (
+
+            new TypeEditor());
+        typeColumn.setCellRenderer (
+
+            new TypeRenderer());
+        typeColumn.setPreferredWidth (
+            350);
         TableColumn nameColumn = fieldsTable.getColumnModel().getColumn(6);
         JTextField nameTextField = new JTextField();
-        nameColumn.setCellEditor (new DefaultCellEditor(nameTextField) {
+
+        nameColumn.setCellEditor ( new DefaultCellEditor(nameTextField) {
             private final Border originalBorder = nameTextField.getBorder();
 
             @Override
@@ -161,66 +197,87 @@ public class GenerateFieldsPanel extends javax.swing.JPanel {
                 nameTextField.setBorder(originalBorder);
                 boolean editingStopped = super.stopCellEditing();
                 if (editingStopped) {
-                    requestFocusInTableCell(7);
+                    int selectedRow = fieldsTable.getSelectedRow();
+                    int fieldValueColumn = 7;
+                    fieldsTable.changeSelection(selectedRow, fieldValueColumn, false, false);
+                    fieldsTable.editCellAt(selectedRow, fieldValueColumn);
+                    JTextField editorComponent = (JTextField) fieldsTable.getEditorComponent();
+                    if (editorComponent != null) {
+                        editorComponent.requestFocusInWindow();
+                    }
                 }
                 dialogDescriptor.setValid(valid());
                 return editingStopped;
             }
-        });
-        nameColumn.setPreferredWidth(200);
-        JTextField valueTextField = new JTextField();
-        TableColumn valueColumn = fieldsTable.getColumnModel().getColumn(7);
-        valueColumn.setCellEditor(new DefaultCellEditor(valueTextField) {
+        }
+
+    );
+    nameColumn.setPreferredWidth (
+        200);
+    JTextField valueTextField = new JTextField();
+    TableColumn valueColumn = fieldsTable.getColumnModel().getColumn(7);
+
+    valueColumn.setCellEditor (
+        new DefaultCellEditor(valueTextField) {
 
             @Override
-            public boolean stopCellEditing() {
+            public boolean stopCellEditing
+
+            () {
                 boolean editingStopped = super.stopCellEditing();
                 if (editingStopped) {
-                    SwingUtilities.invokeLater(() -> addFieldButton.requestFocusInWindow());
+                    SwingUtilities.invokeLater(() -> {
+                        fieldsTable.clearSelection();
+                        addFieldButton.requestFocusInWindow();
+                    });
                 }
                 return editingStopped;
             }
-        });
-        valueColumn.setPreferredWidth(200);
-        fieldsScrollPane.setViewportView(fieldsTable);
+        }
 
-        org.openide.awt.Mnemonics.setLocalizedText(removeFieldButton, org.openide.util.NbBundle.getMessage(GenerateFieldsPanel.class, "GenerateFieldsPanel.removeFieldButton.text")); // NOI18N
-        removeFieldButton.setEnabled(false);
-        removeFieldButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                removeFieldButtonActionPerformed(evt);
-            }
-        });
+    );
+    valueColumn.setPreferredWidth (
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(addFieldButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(removeFieldButton)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(fieldsScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 988, Short.MAX_VALUE))
-                .addContainerGap())
-        );
+        200);
+    fieldsScrollPane.setViewportView(fieldsTable);
 
-        layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {addFieldButton, removeFieldButton});
+    org.openide.awt.Mnemonics.setLocalizedText(removeFieldButton, org.openide.util.NbBundle.getMessage(GenerateFieldsPanel.class, "GenerateFieldsPanel.removeFieldButton.text")); // NOI18N
+    removeFieldButton.setEnabled(false);
+    removeFieldButton.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent evt) {
+            removeFieldButtonActionPerformed(evt);
+        }
+    });
 
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(fieldsScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 302, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+    javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
+    this.setLayout(layout);
+    layout.setHorizontalGroup(
+        layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        .addGroup(layout.createSequentialGroup()
+            .addContainerGap()
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createSequentialGroup()
                     .addComponent(addFieldButton)
-                    .addComponent(removeFieldButton))
-                .addContainerGap())
-        );
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addComponent(removeFieldButton)
+                    .addGap(0, 0, Short.MAX_VALUE))
+                .addComponent(fieldsScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 988, Short.MAX_VALUE))
+            .addContainerGap())
+    );
+
+    layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {addFieldButton, removeFieldButton});
+
+    layout.setVerticalGroup(
+        layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        .addGroup(layout.createSequentialGroup()
+            .addContainerGap()
+            .addComponent(fieldsScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 302, Short.MAX_VALUE)
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addComponent(addFieldButton)
+                .addComponent(removeFieldButton))
+            .addContainerGap())
+    );
     }// </editor-fold>//GEN-END:initComponents
 
     private void addFieldButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addFieldButtonActionPerformed
@@ -246,8 +303,9 @@ public class GenerateFieldsPanel extends javax.swing.JPanel {
             EMPTY_STRING,
             EMPTY_STRING
         });
-        int row = fieldsTable.convertRowIndexToView(fieldsTableModel.getRowCount() - 1);
-        fieldsTable.getSelectionModel().setSelectionInterval(row, row);
+        int row = fieldsTable.getRowCount() > 0 ? fieldsTableModel.getRowCount() - 1 : 0;
+        int column = 5;
+        fieldsTable.changeSelection(row, column, false, false);
     }
 
     private void removeRowFromTable() {
@@ -291,10 +349,22 @@ public class GenerateFieldsPanel extends javax.swing.JPanel {
         addFieldButtonActionPerformed(null);
     }
 
-    private void requestFocusInTableCell(int column) {
-        fieldsTable.editCellAt(fieldsTable.getSelectedRow(), column);
-        fieldsTable.setSurrendersFocusOnKeystroke(true);
-        SwingUtilities.invokeLater(() -> fieldsTable.getEditorComponent().requestFocusInWindow());
+    private String suggestFieldName(String type) {
+        String name = ""; //NOI18N
+        Matcher matcher = Pattern.compile("^([a-zA-Z_]\\w+?)((\\[\\])|(\\<.*?\\>))?$").matcher(type); //NOI18N
+        if (matcher.matches()) {
+            name = matcher.group(1);
+            name = name.substring(0, 1).toLowerCase(Locale.getDefault()).concat(name.substring(1));
+        } else {
+            matcher = Pattern
+                    .compile("^([a-zA-Z_]\\w+?(\\.[a-zA-Z_]\\w+?)+?)((\\[\\])|(\\<.*?\\>))?$") //NOI18N
+                    .matcher(type);
+            if (matcher.matches()) {
+                name = matcher.group(1).substring(matcher.group(1).lastIndexOf('.') + 1);
+                name = name.substring(0, 1).toLowerCase(Locale.getDefault()).concat(name.substring(1));
+            }
+        }
+        return name;
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addFieldButton;
@@ -316,7 +386,17 @@ public class GenerateFieldsPanel extends javax.swing.JPanel {
             ElementHandle<TypeElement> handle = TypeElementFinder.find(null, null, null);
             if (handle != null) {
                 typeTextField.setText(handle.getQualifiedName());
-                requestFocusInTableCell(6);
+                int selectedRow = fieldsTable.getSelectedRow();
+                int fieldNameColumn = 6;
+                String fieldName = suggestFieldName(handle.getQualifiedName());
+                fieldsTableModel.setValueAt(fieldName, selectedRow, fieldNameColumn);
+                fieldsTable.changeSelection(selectedRow, fieldNameColumn, false, false);
+                fieldsTable.editCellAt(selectedRow, fieldNameColumn);
+                JTextField editorComponent = (JTextField) fieldsTable.getEditorComponent();
+                if (editorComponent != null) {
+                    editorComponent.selectAll();
+                    editorComponent.requestFocus();
+                }
             }
         }
 
@@ -359,7 +439,7 @@ public class GenerateFieldsPanel extends javax.swing.JPanel {
             );
         }// </editor-fold>
         // Variables declaration - do not modify
-        private javax.swing.JButton browseButton;
+        protected javax.swing.JButton browseButton;
         protected javax.swing.JTextField typeTextField;
         // End of variables declaration
     }
@@ -420,32 +500,17 @@ public class GenerateFieldsPanel extends javax.swing.JPanel {
             }
             typeTextField.setBorder(originalBorder);
             fireEditingStopped();
-            String fieldName = suggestFieldName();
+            String fieldName = suggestFieldName(typeTextField.getText());
             int selectedRow = fieldsTable.getSelectedRow();
             int fieldNameColumn = 6;
             fieldsTableModel.setValueAt(fieldName, selectedRow, fieldNameColumn);
-            requestFocusInTableCell(fieldNameColumn);
+            fieldsTable.changeSelection(selectedRow, fieldNameColumn, false, false);
+            fieldsTable.editCellAt(selectedRow, fieldNameColumn);
+            JTextField editorComponent = (JTextField) fieldsTable.getEditorComponent();
+            editorComponent.selectAll();
+            fieldsTable.getEditorComponent().requestFocus();
             dialogDescriptor.setValid(valid());
             return true;
-        }
-
-        private String suggestFieldName() {
-            String name = ""; //NOI18N
-            String type = typeTextField.getText();
-            Matcher matcher = Pattern.compile("^([a-zA-Z_]\\w+?)((\\[\\])|(\\<.*?\\>))?$").matcher(type); //NOI18N
-            if (matcher.matches()) {
-                name = matcher.group(1);
-                name = name.substring(0, 1).toLowerCase(Locale.getDefault()).concat(name.substring(1));
-            } else {
-                matcher = Pattern
-                        .compile("^([a-zA-Z_]\\w+?(\\.[a-zA-Z_]\\w+?)+?)((\\[\\])|(\\<.*?\\>))?$") //NOI18N
-                        .matcher(type);
-                if (matcher.matches()) {
-                    name = matcher.group(1).substring(matcher.group(1).lastIndexOf('.') + 1);
-                    name = name.substring(0, 1).toLowerCase(Locale.getDefault()).concat(name.substring(1));
-                }
-            }
-            return name;
         }
 
         @Override

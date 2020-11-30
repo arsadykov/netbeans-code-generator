@@ -4,6 +4,9 @@
 <!-- If you delete this file and reopen the project it will be recreated. -->
 <project name="com.github.isarthur.netbeans.editor.generator" default="netbeans" basedir=".">
     <description>Builds, tests, and runs the project com.github.isarthur.netbeans.editor.generator.</description>
-    <target name="build" depends="netbeans,nbm"/>
+    <target name="build" depends="netbeans,copy-jar"/>
+    <target name="copy-jar" depends="netbeans">
+        <copy file="${basedir}/build/cluster/modules/com-github-isarthur-netbeans-editor-generator.jar" todir="${netbeans.user}/modules"/>
+    </target>
     <import file="nbproject/build-impl.xml"/>
 </project>

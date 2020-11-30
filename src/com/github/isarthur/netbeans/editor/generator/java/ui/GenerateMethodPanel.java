@@ -19,7 +19,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.lang.reflect.TypeVariable;
 import java.util.EventObject;
 import java.util.List;
 import java.util.Locale;
@@ -237,23 +236,38 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
             }
         ) {
             Class<?>[] types = new Class<?> [] {
-                java.lang.Boolean.class, java.lang.String.class, java.lang.String.class
+                java.lang.Boolean.class
+
+                , java.lang.String.class
+
+                , java.lang.String.class
             };
 
             public Class<?> getColumnClass(int columnIndex) {
-                return types [columnIndex];
+                return types[columnIndex];
             }
         });
-        parametersTable.setEnabled(false);
+        parametersTable.setCellSelectionEnabled(true);
+        parametersTable.setEnabled (
+            false);
         TableColumn finalColumn = parametersTable.getColumnModel().getColumn(0);
-        finalColumn.setPreferredWidth(50);
+
+        finalColumn.setPreferredWidth (
+            50);
         TableColumn typeColumn = parametersTable.getColumnModel().getColumn(1);
-        typeColumn.setCellEditor(new ParameterTypeEditor());
-        typeColumn.setCellRenderer(new TypeRenderer());
-        typeColumn.setPreferredWidth(350);
+
+        typeColumn.setCellEditor (
+
+            new ParameterTypeEditor());
+        typeColumn.setCellRenderer (
+
+            new TypeRenderer());
+        typeColumn.setPreferredWidth (
+            350);
         TableColumn nameColumn = parametersTable.getColumnModel().getColumn(2);
         JTextField parameterNameTextField = new JTextField();
-        nameColumn.setCellEditor (new DefaultCellEditor(parameterNameTextField) {
+
+        nameColumn.setCellEditor ( new DefaultCellEditor(parameterNameTextField) {
             private final Border originalBorder = parameterNameTextField.getBorder();
 
             @Override
@@ -269,308 +283,319 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
                 parameterNameTextField.setBorder(originalBorder);
                 boolean editingStopped = super.stopCellEditing();
                 if (editingStopped) {
-                    SwingUtilities.invokeLater(() -> addParameterButton.requestFocusInWindow());
+                    SwingUtilities.invokeLater(() -> {
+                        parametersTable.clearSelection();
+                        addParameterButton.requestFocusInWindow();
+                    });
                 }
                 dialogDescriptor.setValid(valid());
                 return editingStopped;
             }
-        });
-        nameColumn.setPreferredWidth(200);
-        parametersScrollPane.setViewportView(parametersTable);
+        }
+    );
+    nameColumn.setPreferredWidth(200);
+    parametersScrollPane.setViewportView(parametersTable);
 
-        org.openide.awt.Mnemonics.setLocalizedText(addParameterButton, org.openide.util.NbBundle.getMessage(GenerateMethodPanel.class, "GenerateMethodPanel.addParameterButton.text")); // NOI18N
-        addParameterButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                addParameterButtonActionPerformed(evt);
+    org.openide.awt.Mnemonics.setLocalizedText(addParameterButton, org.openide.util.NbBundle.getMessage(GenerateMethodPanel.class, "GenerateMethodPanel.addParameterButton.text")); // NOI18N
+    addParameterButton.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent evt) {
+            addParameterButtonActionPerformed(evt);
+        }
+    });
+
+    org.openide.awt.Mnemonics.setLocalizedText(removeParameterButton, org.openide.util.NbBundle.getMessage(GenerateMethodPanel.class, "GenerateMethodPanel.removeParameterButton.text")); // NOI18N
+    removeParameterButton.setEnabled(false);
+    removeParameterButton.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent evt) {
+            removeParameterButtonActionPerformed(evt);
+        }
+    });
+
+    typeParametersScrollPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, org.openide.util.NbBundle.getMessage(GenerateMethodPanel.class, "GenerateMethodPanel.typeParametersScrollPane.border.title"), javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION)); // NOI18N
+
+    typeParametersTable.setRowHeight(30);
+    typeParametersTable.setModel(new javax.swing.table.DefaultTableModel(
+        new Object [][] {
+
+        },
+        new String [] {
+            "Name", "Extends"
+        }
+    ) {
+        Class<?>[] types = new Class<?> [] {
+            java.lang.String.class, java.lang.String.class
+        };
+
+        public Class<?> getColumnClass(int columnIndex) {
+            return types [columnIndex];
+        }
+    });
+    typeParametersTable.setCellSelectionEnabled(true);
+    typeParametersTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+    typeParametersTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+    TableColumn typeParameterNameTableColumn = typeParametersTable.getColumnModel().getColumn(0);
+    JTextField typeParameterNameTextField = new JTextField();
+    typeParameterNameTableColumn.setCellEditor (new DefaultCellEditor(typeParameterNameTextField) {
+        private final Border originalBorder = typeParameterNameTextField.getBorder();
+
+        @Override
+        public boolean stopCellEditing() {
+            InputVerifier verifier = new TypeParameterNameVerifier();
+            if (!(verifier.verify(typeParameterNameTextField))) {
+                typeParameterNameTextField.setBorder(new LineBorder(Color.red));
+                typeParameterNameTextField.selectAll();
+                typeParameterNameTextField.requestFocusInWindow();
+                super.stopCellEditing();
+                dialogDescriptor.setValid(false);
+                return false;
             }
-        });
-
-        org.openide.awt.Mnemonics.setLocalizedText(removeParameterButton, org.openide.util.NbBundle.getMessage(GenerateMethodPanel.class, "GenerateMethodPanel.removeParameterButton.text")); // NOI18N
-        removeParameterButton.setEnabled(false);
-        removeParameterButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                removeParameterButtonActionPerformed(evt);
-            }
-        });
-
-        typeParametersScrollPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, org.openide.util.NbBundle.getMessage(GenerateMethodPanel.class, "GenerateMethodPanel.typeParametersScrollPane.border.title"), javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION)); // NOI18N
-
-        typeParametersTable.setRowHeight(30);
-        typeParametersTable.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-
-            },
-            new String [] {
-                "Name", "Extends"
-            }
-        ) {
-            Class<?>[] types = new Class<?> [] {
-                java.lang.String.class, java.lang.String.class
-            };
-
-            public Class<?> getColumnClass(int columnIndex) {
-                return types [columnIndex];
-            }
-        });
-        TableColumn typeParameterNameTableColumn = typeParametersTable.getColumnModel().getColumn(0);
-        JTextField typeParameterNameTextField = new JTextField();
-        typeParameterNameTableColumn.setCellEditor (new DefaultCellEditor(typeParameterNameTextField) {
-            private final Border originalBorder = typeParameterNameTextField.getBorder();
-
-            @Override
-            public boolean stopCellEditing() {
-                InputVerifier verifier = new TypeParameterNameVerifier();
-                if (!(verifier.verify(typeParameterNameTextField))) {
-                    typeParameterNameTextField.setBorder(new LineBorder(Color.red));
-                    typeParameterNameTextField.selectAll();
-                    typeParameterNameTextField.requestFocusInWindow();
-                    super.stopCellEditing();
-                    dialogDescriptor.setValid(false);
-                    return false;
-                }
-                typeParameterNameTextField.setBorder(originalBorder);
-                boolean editingStopped = super.stopCellEditing();
-                if (editingStopped) {
-                    requestFocusInTypeParametersTableCell();
-                }
+            typeParameterNameTextField.setBorder(originalBorder);
+            boolean editingStopped = super.stopCellEditing();
+            if (editingStopped) {
+                int selectedRow = typeParametersTable.getSelectedRow();
+                int typeParameterTypeColumn = 1;
+                typeParametersTable.changeSelection(selectedRow, typeParameterTypeColumn, false, false);
                 dialogDescriptor.setValid(valid());
-                return editingStopped;
             }
-        });
-        typeParameterNameTableColumn.setPreferredWidth(75);
-        TableColumn extendsTableColumn = typeParametersTable.getColumnModel().getColumn(1);
-        extendsTableColumn.setCellEditor(new TypeParameterTypeEditor());
-        extendsTableColumn.setCellRenderer(new TypeRenderer());
-        extendsTableColumn.setPreferredWidth(350);
-        typeParametersScrollPane.setViewportView(typeParametersTable);
+            dialogDescriptor.setValid(valid());
+            return editingStopped;
+        }
+    });
+    typeParameterNameTableColumn.setPreferredWidth(75);
+    TableColumn extendsTableColumn = typeParametersTable.getColumnModel().getColumn(1);
+    extendsTableColumn.setCellEditor(new TypeParameterTypeEditor());
+    extendsTableColumn.setCellRenderer(new TypeRenderer());
+    extendsTableColumn.setPreferredWidth(350);
+    typeParametersScrollPane.setViewportView(typeParametersTable);
 
-        org.openide.awt.Mnemonics.setLocalizedText(addTypeParameterButton, org.openide.util.NbBundle.getMessage(GenerateMethodPanel.class, "GenerateMethodPanel.addTypeParameterButton.text")); // NOI18N
-        addTypeParameterButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                addTypeParameterButtonActionPerformed(evt);
-            }
-        });
+    org.openide.awt.Mnemonics.setLocalizedText(addTypeParameterButton, org.openide.util.NbBundle.getMessage(GenerateMethodPanel.class, "GenerateMethodPanel.addTypeParameterButton.text")); // NOI18N
+    addTypeParameterButton.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent evt) {
+            addTypeParameterButtonActionPerformed(evt);
+        }
+    });
 
-        org.openide.awt.Mnemonics.setLocalizedText(removeTypeParameterButton, org.openide.util.NbBundle.getMessage(GenerateMethodPanel.class, "GenerateMethodPanel.removeTypeParameterButton.text")); // NOI18N
-        removeTypeParameterButton.setEnabled(false);
-        removeTypeParameterButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                removeTypeParameterButtonActionPerformed(evt);
-            }
-        });
+    org.openide.awt.Mnemonics.setLocalizedText(removeTypeParameterButton, org.openide.util.NbBundle.getMessage(GenerateMethodPanel.class, "GenerateMethodPanel.removeTypeParameterButton.text")); // NOI18N
+    removeTypeParameterButton.setEnabled(false);
+    removeTypeParameterButton.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent evt) {
+            removeTypeParameterButtonActionPerformed(evt);
+        }
+    });
 
-        org.openide.awt.Mnemonics.setLocalizedText(addThrownTypeButton, org.openide.util.NbBundle.getMessage(GenerateMethodPanel.class, "GenerateMethodPanel.addThrownTypeButton.text")); // NOI18N
-        addThrownTypeButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                addThrownTypeButtonActionPerformed(evt);
-            }
-        });
+    org.openide.awt.Mnemonics.setLocalizedText(addThrownTypeButton, org.openide.util.NbBundle.getMessage(GenerateMethodPanel.class, "GenerateMethodPanel.addThrownTypeButton.text")); // NOI18N
+    addThrownTypeButton.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent evt) {
+            addThrownTypeButtonActionPerformed(evt);
+        }
+    });
 
-        org.openide.awt.Mnemonics.setLocalizedText(removeThrownTypeButton, org.openide.util.NbBundle.getMessage(GenerateMethodPanel.class, "GenerateMethodPanel.removeThrownTypeButton.text")); // NOI18N
-        removeThrownTypeButton.setEnabled(false);
-        removeThrownTypeButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                removeThrownTypeButtonActionPerformed(evt);
-            }
-        });
+    org.openide.awt.Mnemonics.setLocalizedText(removeThrownTypeButton, org.openide.util.NbBundle.getMessage(GenerateMethodPanel.class, "GenerateMethodPanel.removeThrownTypeButton.text")); // NOI18N
+    removeThrownTypeButton.setEnabled(false);
+    removeThrownTypeButton.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent evt) {
+            removeThrownTypeButtonActionPerformed(evt);
+        }
+    });
 
-        throwsScrollPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, org.openide.util.NbBundle.getMessage(GenerateMethodPanel.class, "GenerateMethodPanel.throwsScrollPane.border.title"), javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION)); // NOI18N
+    throwsScrollPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, org.openide.util.NbBundle.getMessage(GenerateMethodPanel.class, "GenerateMethodPanel.throwsScrollPane.border.title"), javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION)); // NOI18N
 
-        throwsTable.setRowHeight(30);
-        throwsTable.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
+    throwsTable.setRowHeight(30);
+    throwsTable.setModel(new javax.swing.table.DefaultTableModel(
+        new Object [][] {
 
-            },
-            new String [] {
-                "Type"
-            }
-        ) {
-            Class<?>[] types = new Class<?> [] {
-                java.lang.String.class
-            };
+        },
+        new String [] {
+            "Type"
+        }
+    ) {
+        Class<?>[] types = new Class<?> [] {
+            java.lang.String.class
+        };
 
-            public Class<?> getColumnClass(int columnIndex) {
-                return types [columnIndex];
-            }
-        });
-        TableColumn thrownTypeTableColumn = throwsTable.getColumnModel().getColumn(0);
-        thrownTypeTableColumn.setCellRenderer(new TypeRenderer());
-        thrownTypeTableColumn.setCellEditor(new ThrowingTypeEditor());
-        throwsScrollPane.setViewportView(throwsTable);
+        public Class<?> getColumnClass(int columnIndex) {
+            return types [columnIndex];
+        }
+    });
+    throwsTable.setCellSelectionEnabled(true);
+    TableColumn thrownTypeTableColumn = throwsTable.getColumnModel().getColumn(0);
+    thrownTypeTableColumn.setCellRenderer(new TypeRenderer());
+    thrownTypeTableColumn.setCellEditor(new ThrowingTypeEditor());
+    throwsScrollPane.setViewportView(throwsTable);
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, org.openide.util.NbBundle.getMessage(GenerateMethodPanel.class, "GenerateMethodPanel.jPanel1.border.title"), javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION)); // NOI18N
+    jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, org.openide.util.NbBundle.getMessage(GenerateMethodPanel.class, "GenerateMethodPanel.jPanel1.border.title"), javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION)); // NOI18N
 
-        org.openide.awt.Mnemonics.setLocalizedText(finalCheckBox, org.openide.util.NbBundle.getMessage(GenerateMethodPanel.class, "GenerateMethodPanel.finalCheckBox.text")); // NOI18N
-        finalCheckBox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                finalCheckBoxActionPerformed(evt);
-            }
-        });
+    org.openide.awt.Mnemonics.setLocalizedText(finalCheckBox, org.openide.util.NbBundle.getMessage(GenerateMethodPanel.class, "GenerateMethodPanel.finalCheckBox.text")); // NOI18N
+    finalCheckBox.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent evt) {
+            finalCheckBoxActionPerformed(evt);
+        }
+    });
 
-        org.openide.awt.Mnemonics.setLocalizedText(staticCheckBox, org.openide.util.NbBundle.getMessage(GenerateMethodPanel.class, "GenerateMethodPanel.staticCheckBox.text")); // NOI18N
-        staticCheckBox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                staticCheckBoxActionPerformed(evt);
-            }
-        });
+    org.openide.awt.Mnemonics.setLocalizedText(staticCheckBox, org.openide.util.NbBundle.getMessage(GenerateMethodPanel.class, "GenerateMethodPanel.staticCheckBox.text")); // NOI18N
+    staticCheckBox.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent evt) {
+            staticCheckBoxActionPerformed(evt);
+        }
+    });
 
-        org.openide.awt.Mnemonics.setLocalizedText(abstractCheckBox, org.openide.util.NbBundle.getMessage(GenerateMethodPanel.class, "GenerateMethodPanel.abstractCheckBox.text")); // NOI18N
-        abstractCheckBox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                abstractCheckBoxActionPerformed(evt);
-            }
-        });
+    org.openide.awt.Mnemonics.setLocalizedText(abstractCheckBox, org.openide.util.NbBundle.getMessage(GenerateMethodPanel.class, "GenerateMethodPanel.abstractCheckBox.text")); // NOI18N
+    abstractCheckBox.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent evt) {
+            abstractCheckBoxActionPerformed(evt);
+        }
+    });
 
-        org.openide.awt.Mnemonics.setLocalizedText(strictfpCheckBox, org.openide.util.NbBundle.getMessage(GenerateMethodPanel.class, "GenerateMethodPanel.strictfpCheckBox.text")); // NOI18N
-        strictfpCheckBox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                strictfpCheckBoxActionPerformed(evt);
-            }
-        });
+    org.openide.awt.Mnemonics.setLocalizedText(strictfpCheckBox, org.openide.util.NbBundle.getMessage(GenerateMethodPanel.class, "GenerateMethodPanel.strictfpCheckBox.text")); // NOI18N
+    strictfpCheckBox.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent evt) {
+            strictfpCheckBoxActionPerformed(evt);
+        }
+    });
 
-        accessComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "package", "private", "protected", "public" }));
+    accessComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "package", "private", "protected", "public" }));
 
-        org.openide.awt.Mnemonics.setLocalizedText(nativeCheckBox, org.openide.util.NbBundle.getMessage(GenerateMethodPanel.class, "GenerateMethodPanel.nativeCheckBox.text")); // NOI18N
-        nativeCheckBox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                nativeCheckBoxActionPerformed(evt);
-            }
-        });
+    org.openide.awt.Mnemonics.setLocalizedText(nativeCheckBox, org.openide.util.NbBundle.getMessage(GenerateMethodPanel.class, "GenerateMethodPanel.nativeCheckBox.text")); // NOI18N
+    nativeCheckBox.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent evt) {
+            nativeCheckBoxActionPerformed(evt);
+        }
+    });
 
-        org.openide.awt.Mnemonics.setLocalizedText(synchronizedCheckBox, org.openide.util.NbBundle.getMessage(GenerateMethodPanel.class, "GenerateMethodPanel.synchronizedCheckBox.text")); // NOI18N
-        synchronizedCheckBox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                synchronizedCheckBoxActionPerformed(evt);
-            }
-        });
+    org.openide.awt.Mnemonics.setLocalizedText(synchronizedCheckBox, org.openide.util.NbBundle.getMessage(GenerateMethodPanel.class, "GenerateMethodPanel.synchronizedCheckBox.text")); // NOI18N
+    synchronizedCheckBox.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent evt) {
+            synchronizedCheckBoxActionPerformed(evt);
+        }
+    });
 
-        accessLabel.setLabelFor(accessComboBox);
-        org.openide.awt.Mnemonics.setLocalizedText(accessLabel, org.openide.util.NbBundle.getMessage(GenerateMethodPanel.class, "GenerateMethodPanel.accessLabel.text")); // NOI18N
+    accessLabel.setLabelFor(accessComboBox);
+    org.openide.awt.Mnemonics.setLocalizedText(accessLabel, org.openide.util.NbBundle.getMessage(GenerateMethodPanel.class, "GenerateMethodPanel.accessLabel.text")); // NOI18N
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(accessLabel)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(accessComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(staticCheckBox)
-                    .addComponent(finalCheckBox)
-                    .addComponent(abstractCheckBox)
-                    .addComponent(synchronizedCheckBox)
-                    .addComponent(nativeCheckBox)
-                    .addComponent(strictfpCheckBox))
-                .addContainerGap())
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+    javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+    jPanel1.setLayout(jPanel1Layout);
+    jPanel1Layout.setHorizontalGroup(
+        jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        .addGroup(jPanel1Layout.createSequentialGroup()
+            .addContainerGap()
+            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel1Layout.createSequentialGroup()
                     .addComponent(accessLabel)
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                     .addComponent(accessComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(abstractCheckBox)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(staticCheckBox)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(finalCheckBox)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(abstractCheckBox)
                 .addComponent(synchronizedCheckBox)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(nativeCheckBox)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(strictfpCheckBox)
-                .addContainerGap())
-        );
+                .addComponent(strictfpCheckBox))
+            .addContainerGap())
+    );
+    jPanel1Layout.setVerticalGroup(
+        jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        .addGroup(jPanel1Layout.createSequentialGroup()
+            .addContainerGap()
+            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addComponent(accessLabel)
+                .addComponent(accessComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addComponent(abstractCheckBox)
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addComponent(staticCheckBox)
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addComponent(finalCheckBox)
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addComponent(synchronizedCheckBox)
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addComponent(nativeCheckBox)
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addComponent(strictfpCheckBox)
+            .addContainerGap())
+    );
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(nameLabel)
-                            .addComponent(typeLabel))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(typeTextField)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(browseButton))
-                            .addComponent(nameTextField)))
-                    .addComponent(parametersScrollPane)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(addParameterButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(removeParameterButton)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(typeParametersScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 594, Short.MAX_VALUE)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(addTypeParameterButton)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(removeTypeParameterButton)
-                                .addGap(0, 0, Short.MAX_VALUE)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(addThrownTypeButton)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(removeThrownTypeButton))
-                            .addComponent(throwsScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 301, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap())
-        );
-
-        layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {addParameterButton, removeParameterButton});
-
-        layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {addTypeParameterButton, removeTypeParameterButton});
-
-        layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {addThrownTypeButton, removeThrownTypeButton});
-
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(typeParametersScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 152, Short.MAX_VALUE)
-                            .addComponent(throwsScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(addTypeParameterButton)
-                            .addComponent(removeTypeParameterButton)
-                            .addComponent(addThrownTypeButton)
-                            .addComponent(removeThrownTypeButton)))
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(typeTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(browseButton)
-                    .addComponent(typeLabel))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(nameLabel)
-                    .addComponent(nameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(parametersScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 212, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+    javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
+    this.setLayout(layout);
+    layout.setHorizontalGroup(
+        layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        .addGroup(layout.createSequentialGroup()
+            .addContainerGap()
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createSequentialGroup()
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(nameLabel)
+                        .addComponent(typeLabel))
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                            .addComponent(typeTextField)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(browseButton))
+                        .addComponent(nameTextField)))
+                .addComponent(parametersScrollPane)
+                .addGroup(layout.createSequentialGroup()
                     .addComponent(addParameterButton)
-                    .addComponent(removeParameterButton))
-                .addContainerGap())
-        );
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addComponent(removeParameterButton)
+                    .addGap(0, 0, Short.MAX_VALUE))
+                .addGroup(layout.createSequentialGroup()
+                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(typeParametersScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 594, Short.MAX_VALUE)
+                        .addGroup(layout.createSequentialGroup()
+                            .addComponent(addTypeParameterButton)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(removeTypeParameterButton)
+                            .addGap(0, 0, Short.MAX_VALUE)))
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                            .addComponent(addThrownTypeButton)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(removeThrownTypeButton))
+                        .addComponent(throwsScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 301, javax.swing.GroupLayout.PREFERRED_SIZE))))
+            .addContainerGap())
+    );
+
+    layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {addParameterButton, removeParameterButton});
+
+    layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {addTypeParameterButton, removeTypeParameterButton});
+
+    layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {addThrownTypeButton, removeThrownTypeButton});
+
+    layout.setVerticalGroup(
+        layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        .addGroup(layout.createSequentialGroup()
+            .addContainerGap()
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createSequentialGroup()
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(typeParametersScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 152, Short.MAX_VALUE)
+                        .addComponent(throwsScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(addTypeParameterButton)
+                        .addComponent(removeTypeParameterButton)
+                        .addComponent(addThrownTypeButton)
+                        .addComponent(removeThrownTypeButton)))
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addComponent(typeTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(browseButton)
+                .addComponent(typeLabel))
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addComponent(nameLabel)
+                .addComponent(nameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addComponent(parametersScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 212, Short.MAX_VALUE)
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addComponent(addParameterButton)
+                .addComponent(removeParameterButton))
+            .addContainerGap())
+    );
     }// </editor-fold>//GEN-END:initComponents
 
     private void browseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_browseButtonActionPerformed
@@ -676,11 +701,9 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
             EMPTY_STRING,
             EMPTY_STRING
         });
-        parametersTable.getSelectionModel().setSelectionInterval(
-                parametersTable.getRowCount() - 1, parametersTable.getRowCount() - 1);
-        parametersTable.editCellAt(parametersTable.getSelectedRow(), 1);
-        parametersTable.setSurrendersFocusOnKeystroke(true);
-        SwingUtilities.invokeLater(() -> parametersTable.getEditorComponent().requestFocusInWindow());
+        int row = parametersTable.getRowCount() > 0 ? parametersTable.getRowCount() - 1 : 0;
+        int column = 1;
+        parametersTable.changeSelection(row, column, false, false);
     }
 
     private void removeRowFromParametersTable() {
@@ -843,18 +866,6 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
     List<?> getMethodThrownTypes() {
         return throwsTableModel.getDataVector();
     }
-
-    private void requestFocusInParametersTableCell() {
-        parametersTable.editCellAt(parametersTable.getSelectedRow(), 2);
-        parametersTable.setSurrendersFocusOnKeystroke(true);
-        SwingUtilities.invokeLater(() -> parametersTable.getEditorComponent().requestFocusInWindow());
-    }
-
-    private void requestFocusInTypeParametersTableCell() {
-        typeParametersTable.editCellAt(typeParametersTable.getSelectedRow(), 1);
-        typeParametersTable.setSurrendersFocusOnKeystroke(true);
-        SwingUtilities.invokeLater(() -> typeParametersTable.getEditorComponent().requestFocusInWindow());
-    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox abstractCheckBox;
     private javax.swing.JComboBox<String> accessComboBox;
@@ -897,9 +908,15 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
             ElementHandle<TypeElement> handle = TypeElementFinder.find(null, null, null);
             if (handle != null) {
                 parameterTypeTextField.setText(handle.getQualifiedName());
-                String parameterName = suggestParameterName(handle.getQualifiedName());
-                parametersTableModel.setValueAt(parameterName, parametersTable.getSelectedRow(), 2);
-                requestFocusInParametersTableCell();
+                String parameterName = suggestParameterName(parameterTypeTextField.getText());
+                int selectedRow = parametersTable.getSelectedRow();
+                int parameterNameColumn = 2;
+                parametersTableModel.setValueAt(parameterName, selectedRow, parameterNameColumn);
+                parametersTable.changeSelection(selectedRow, parameterNameColumn, false, false);
+                parametersTable.editCellAt(selectedRow, parameterNameColumn);
+                JTextField editorComponent = (JTextField) parametersTable.getEditorComponent();
+                editorComponent.selectAll();
+                parametersTable.getEditorComponent().requestFocus();
             }
         }
 
@@ -961,7 +978,10 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
             ElementHandle<TypeElement> handle = TypeElementFinder.find(null, null, null);
             if (handle != null) {
                 typeParameterTypeTextField.setText(handle.getQualifiedName());
-                SwingUtilities.invokeLater(() -> addTypeParameterButton.requestFocusInWindow());
+                SwingUtilities.invokeLater(() -> {
+                    typeParametersTable.clearSelection();
+                    addTypeParameterButton.requestFocusInWindow();
+                });
             }
         }
 
@@ -1020,7 +1040,10 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
             ElementHandle<TypeElement> handle = TypeElementFinder.find(null, null, null);
             if (handle != null) {
                 throwingTypeTextField.setText(handle.getQualifiedName());
-                SwingUtilities.invokeLater(() -> addThrownTypeButton.requestFocusInWindow());
+                SwingUtilities.invokeLater(() -> {
+                    throwsTable.clearSelection();
+                    addThrownTypeButton.requestFocusInWindow();
+                });
             }
         }
 
@@ -1128,7 +1151,11 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
             int selectedRow = parametersTable.getSelectedRow();
             int parameterNameColumn = 2;
             parametersTableModel.setValueAt(parameterName, selectedRow, parameterNameColumn);
-            requestFocusInParametersTableCell();
+            parametersTable.changeSelection(selectedRow, parameterNameColumn, false, false);
+            parametersTable.editCellAt(selectedRow, parameterNameColumn);
+            JTextField editorComponent = (JTextField) parametersTable.getEditorComponent();
+            editorComponent.selectAll();
+            parametersTable.getEditorComponent().requestFocus();
             dialogDescriptor.setValid(valid());
             return true;
         }
@@ -1218,7 +1245,10 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
             }
             typeParameterTypeTextField.setBorder(originalBorder);
             fireEditingStopped();
-            SwingUtilities.invokeLater(() -> addTypeParameterButton.requestFocusInWindow());
+            SwingUtilities.invokeLater(() -> {
+                typeParametersTable.clearSelection();
+                addTypeParameterButton.requestFocusInWindow();
+            });
             dialogDescriptor.setValid(valid());
             return true;
         }
@@ -1308,7 +1338,10 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
             }
             throwingTypeTextField.setBorder(originalBorder);
             fireEditingStopped();
-            SwingUtilities.invokeLater(() -> addThrownTypeButton.requestFocusInWindow());
+            SwingUtilities.invokeLater(() -> {
+                throwsTable.clearSelection();
+                addThrownTypeButton.requestFocusInWindow();
+            });
             dialogDescriptor.setValid(valid());
             return true;
         }
