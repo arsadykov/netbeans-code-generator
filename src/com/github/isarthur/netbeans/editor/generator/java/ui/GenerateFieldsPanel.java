@@ -21,6 +21,7 @@ import java.util.EventObject;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.lang.model.element.TypeElement;
@@ -350,17 +351,35 @@ public class GenerateFieldsPanel extends javax.swing.JPanel {
         private void browseButtonActionPerformed(java.awt.event.ActionEvent evt) {
             ElementHandle<TypeElement> handle = TypeElementFinder.find(null, null, null);
             if (handle != null) {
-                typeTextField.setText(handle.getQualifiedName());
                 int selectedRow = fieldsTable.getSelectedRow();
                 int fieldNameColumn = 6;
                 String fieldName = suggestFieldName(handle.getQualifiedName());
                 fieldsTableModel.setValueAt(fieldName, selectedRow, fieldNameColumn);
-                fieldsTable.changeSelection(selectedRow, fieldNameColumn, false, false);
-                fieldsTable.editCellAt(selectedRow, fieldNameColumn);
-                JTextField editorComponent = (JTextField) fieldsTable.getEditorComponent();
-                if (editorComponent != null) {
-                    editorComponent.selectAll();
-                    editorComponent.requestFocus();
+                Consumer<Void> handleNonGenericType = x -> {
+                    typeTextField.setText(handle.getQualifiedName());
+                    fieldsTable.changeSelection(selectedRow, fieldNameColumn, false, false);
+                    fieldsTable.editCellAt(selectedRow, fieldNameColumn);
+                    JTextField editorComponent = (JTextField) fieldsTable.getEditorComponent();
+                    if (editorComponent != null) {
+                        editorComponent.selectAll();
+                        editorComponent.requestFocusInWindow();
+                    }
+                };
+                Consumer<Void> handleGenericType = x -> {
+                    typeTextField.requestFocusInWindow();
+                    typeTextField.setText(handle.getQualifiedName() + "<>"); //NOI18N
+                    typeTextField.setCaretPosition(typeTextField.getText().length() - 1);
+                };
+                try {
+                    Class<?> clazz = Class.forName(handle.getQualifiedName());
+                    boolean generic = clazz.getTypeParameters().length > 0;
+                    if (!generic) {
+                        handleNonGenericType.accept(null);
+                    } else {
+                        handleGenericType.accept(null);
+                    }
+                } catch (ClassNotFoundException ex) {
+                    handleNonGenericType.accept(null);
                 }
             }
         }

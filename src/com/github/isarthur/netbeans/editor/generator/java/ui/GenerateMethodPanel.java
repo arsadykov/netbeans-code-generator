@@ -23,6 +23,7 @@ import java.util.EventObject;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.lang.model.element.TypeElement;
@@ -128,7 +129,7 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
         return generateMethodPanel;
     }
 
-    private String suggestParameterName(String type) {
+    private String suggestName(String type) {
         String name = ""; //NOI18N
         Matcher matcher = Pattern.compile("^([a-zA-Z_]\\w+?)((\\[\\])|(\\<.*?\\>))?$").matcher(type); //NOI18N
         if (matcher.matches()) {
@@ -601,14 +602,25 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
     private void browseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_browseButtonActionPerformed
         ElementHandle<TypeElement> handle = TypeElementFinder.find(null, null, null);
         if (handle != null) {
-            typeTextField.setText(handle.getQualifiedName());
+            Consumer<Void> handleNonGenericType = x -> {
+                typeTextField.setText(handle.getQualifiedName());
+                nameTextField.requestFocusInWindow();
+            };
+            Consumer<Void> handleGenericType = x -> {
+                typeTextField.setText(handle.getQualifiedName() + "<>"); //NOI18N
+                typeTextField.setCaretPosition(typeTextField.getText().length() - 1);
+                typeTextField.requestFocusInWindow();
+            };
             try {
                 Class<?> clazz = Class.forName(handle.getQualifiedName());
                 boolean generic = clazz.getTypeParameters().length > 0;
                 if (!generic) {
-                    nameTextField.requestFocusInWindow();
+                    handleNonGenericType.accept(null);
+                } else {
+                    handleGenericType.accept(null);
                 }
             } catch (ClassNotFoundException ex) {
+                handleNonGenericType.accept(null);
             }
         }
     }//GEN-LAST:event_browseButtonActionPerformed
@@ -907,16 +919,36 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
         private void browseButtonActionPerformed(java.awt.event.ActionEvent evt) {
             ElementHandle<TypeElement> handle = TypeElementFinder.find(null, null, null);
             if (handle != null) {
-                parameterTypeTextField.setText(handle.getQualifiedName());
-                String parameterName = suggestParameterName(parameterTypeTextField.getText());
+                String parameterName = suggestName(handle.getQualifiedName());
                 int selectedRow = parametersTable.getSelectedRow();
                 int parameterNameColumn = 2;
                 parametersTableModel.setValueAt(parameterName, selectedRow, parameterNameColumn);
-                parametersTable.changeSelection(selectedRow, parameterNameColumn, false, false);
-                parametersTable.editCellAt(selectedRow, parameterNameColumn);
-                JTextField editorComponent = (JTextField) parametersTable.getEditorComponent();
-                editorComponent.selectAll();
-                parametersTable.getEditorComponent().requestFocus();
+                Consumer<Void> handleNonGenericType = x -> {
+                    parameterTypeTextField.setText(handle.getQualifiedName());
+                    parametersTable.changeSelection(selectedRow, parameterNameColumn, false, false);
+                    parametersTable.editCellAt(selectedRow, parameterNameColumn);
+                    JTextField editorComponent = (JTextField) parametersTable.getEditorComponent();
+                    if (editorComponent != null) {
+                        editorComponent.selectAll();
+                        editorComponent.requestFocusInWindow();
+                    }
+                };
+                Consumer<Void> handleGenericType = x -> {
+                    parameterTypeTextField.requestFocusInWindow();
+                    parameterTypeTextField.setText(handle.getQualifiedName() + "<>"); //NOI18N
+                    parameterTypeTextField.setCaretPosition(parameterTypeTextField.getText().length() - 1);
+                };
+                try {
+                    Class<?> clazz = Class.forName(handle.getQualifiedName());
+                    boolean generic = clazz.getTypeParameters().length > 0;
+                    if (!generic) {
+                        handleNonGenericType.accept(null);
+                    } else {
+                        handleGenericType.accept(null);
+                    }
+                } catch (ClassNotFoundException ex) {
+                    handleNonGenericType.accept(null);
+                }
             }
         }
 
@@ -977,11 +1009,27 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
         private void browseButtonActionPerformed(java.awt.event.ActionEvent evt) {
             ElementHandle<TypeElement> handle = TypeElementFinder.find(null, null, null);
             if (handle != null) {
-                typeParameterTypeTextField.setText(handle.getQualifiedName());
-                SwingUtilities.invokeLater(() -> {
+                Consumer<Void> handleNonGenericType = x -> {
+                    typeParameterTypeTextField.setText(handle.getQualifiedName());
                     typeParametersTable.clearSelection();
                     addTypeParameterButton.requestFocusInWindow();
-                });
+                };
+                Consumer<Void> handleGenericType = x -> {
+                    typeParameterTypeTextField.requestFocusInWindow();
+                    typeParameterTypeTextField.setText(handle.getQualifiedName() + "<>"); //NOI18N
+                    typeParameterTypeTextField.setCaretPosition(typeParameterTypeTextField.getText().length() - 1);
+                };
+                try {
+                    Class<?> clazz = Class.forName(handle.getQualifiedName());
+                    boolean generic = clazz.getTypeParameters().length > 0;
+                    if (!generic) {
+                        handleNonGenericType.accept(null);
+                    } else {
+                        handleGenericType.accept(null);
+                    }
+                } catch (ClassNotFoundException ex) {
+                    handleNonGenericType.accept(null);
+                }
             }
         }
 
@@ -1039,11 +1087,27 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
         private void browseButtonActionPerformed(java.awt.event.ActionEvent evt) {
             ElementHandle<TypeElement> handle = TypeElementFinder.find(null, null, null);
             if (handle != null) {
-                throwingTypeTextField.setText(handle.getQualifiedName());
-                SwingUtilities.invokeLater(() -> {
+                Consumer<Void> handleNonGenericType = x -> {
+                    throwingTypeTextField.setText(handle.getQualifiedName());
                     throwsTable.clearSelection();
                     addThrownTypeButton.requestFocusInWindow();
-                });
+                };
+                Consumer<Void> handleGenericType = x -> {
+                    throwingTypeTextField.requestFocusInWindow();
+                    throwingTypeTextField.setText(handle.getQualifiedName() + "<>"); //NOI18N
+                    throwingTypeTextField.setCaretPosition(throwingTypeTextField.getText().length() - 1);
+                };
+                try {
+                    Class<?> clazz = Class.forName(handle.getQualifiedName());
+                    boolean generic = clazz.getTypeParameters().length > 0;
+                    if (!generic) {
+                        handleNonGenericType.accept(null);
+                    } else {
+                        handleGenericType.accept(null);
+                    }
+                } catch (ClassNotFoundException ex) {
+                    handleNonGenericType.accept(null);
+                }
             }
         }
 
@@ -1147,7 +1211,7 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
             }
             parameterTypeTextField.setBorder(originalBorder);
             fireEditingStopped();
-            String parameterName = suggestParameterName(parameterTypeTextField.getText());
+            String parameterName = suggestName(parameterTypeTextField.getText());
             int selectedRow = parametersTable.getSelectedRow();
             int parameterNameColumn = 2;
             parametersTableModel.setValueAt(parameterName, selectedRow, parameterNameColumn);
