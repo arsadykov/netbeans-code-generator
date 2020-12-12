@@ -59,7 +59,7 @@ public class MethodGenerator implements CodeGenerator {
     private TreePath currentPath;
     private CompilationUnitTree compilationUnit;
     private int insertIndex;
-    private boolean isClass;
+    private boolean isInterface;
 
     /**
      *
@@ -101,21 +101,22 @@ public class MethodGenerator implements CodeGenerator {
                 trees = workingCopy.getTrees();
                 treeUtilities = workingCopy.getTreeUtilities();
                 currentPath = treeUtilities.pathFor(caretPosition);
-                TreePath classOrInterfacePath = treeUtilities.getPathElementOfKind(
-                        EnumSet.of(Tree.Kind.CLASS, Tree.Kind.INTERFACE), currentPath);
-                if (classOrInterfacePath != null) {
-                    Tree classOrInterfaceTree = classOrInterfacePath.getLeaf();
-                    ClassTree oldTree = (ClassTree) classOrInterfaceTree;
+                TreePath classInterfaceOrEnumPath = treeUtilities.getPathElementOfKind(
+                        EnumSet.of(Tree.Kind.CLASS, Tree.Kind.ENUM, Tree.Kind.INTERFACE), currentPath);
+                if (classInterfaceOrEnumPath != null) {
+                    Tree classInterfaceOrEnumTree = classInterfaceOrEnumPath.getLeaf();
+                    ClassTree oldTree = (ClassTree) classInterfaceOrEnumTree;
                     setInsertIndex(oldTree);
-                    if (classOrInterfaceTree.getKind() == Tree.Kind.CLASS) {
-                        isClass = true;
-                        dialog = GenerateMethodDialog.createAndShow(isClass);
+                    if (classInterfaceOrEnumTree.getKind() == Tree.Kind.CLASS
+                            || classInterfaceOrEnumTree.getKind() == Tree.Kind.ENUM) {
+                        isInterface = false;
+                        dialog = GenerateMethodDialog.createAndShow(isInterface);
                     } else {
-                        isClass = false;
-                        dialog = GenerateMethodDialog.createAndShow(isClass);
+                        isInterface = true;
+                        dialog = GenerateMethodDialog.createAndShow(isInterface);
                     }
                     if (dialog.isOkButtonPushed()) {
-                        insertMethodIntoClassOrInterface(workingCopy);
+                        insertMethodIntoClassInterfaceOrEnum(workingCopy);
                     }
                 }
             }).commit();
@@ -126,9 +127,9 @@ public class MethodGenerator implements CodeGenerator {
         dialog.dispose();
     }
 
-    private void insertMethodIntoClassOrInterface(WorkingCopy workingCopy) {
-        ClassTree oldClassTree = getClassOrInterfaceTree(workingCopy);
-        ClassTree newClassTree = oldClassTree;
+    private void insertMethodIntoClassInterfaceOrEnum(WorkingCopy workingCopy) {
+        ClassTree currentClassInterfaceOrEnumTree = getClassInterfaceOrEnumTree(workingCopy);
+        ClassTree newClassInterfaceOrEnumTree = currentClassInterfaceOrEnumTree;
         TreeMaker make = workingCopy.getTreeMaker();
         Set<Modifier> modifiers = getMethodModifiers();
         String methodType = dialog.getMethodType();
@@ -140,7 +141,7 @@ public class MethodGenerator implements CodeGenerator {
         List<?> thrownTypes = dialog.getMethodThrownTypes();
         List<ExpressionTree> methodThrownTypes = getMethodThrownTypes(thrownTypes, make);
         BlockTree block = make.Block(Collections.emptyList(), false);
-        newClassTree = make.insertClassMember(newClassTree,
+        newClassInterfaceOrEnumTree = make.insertClassMember(newClassInterfaceOrEnumTree,
                 insertIndex,
                 make.Method(make.Modifiers(modifiers),
                         methodName,
@@ -148,20 +149,20 @@ public class MethodGenerator implements CodeGenerator {
                         methodTypeParameters,
                         methodParameters,
                         methodThrownTypes,
-                        (isAbstractMethod() || isNativeMethod() || !isClass) ? null : block,
+                        (isAbstractMethod() || isNativeMethod() || isInterface) ? null : block,
                         null)
         );
-        workingCopy.rewrite(oldClassTree, newClassTree);
+        workingCopy.rewrite(currentClassInterfaceOrEnumTree, newClassInterfaceOrEnumTree);
     }
 
-    private ClassTree getClassOrInterfaceTree(WorkingCopy workingCopy) {
-        TreePath classOrInterfacePath = workingCopy
+    private ClassTree getClassInterfaceOrEnumTree(WorkingCopy workingCopy) {
+        TreePath classInterfaceOrEnumPath = workingCopy
                 .getTreeUtilities()
-                .getPathElementOfKind(Set.of(Tree.Kind.INTERFACE, Tree.Kind.CLASS), currentPath);
-        if (classOrInterfacePath == null) {
+                .getPathElementOfKind(Set.of(Tree.Kind.INTERFACE, Tree.Kind.ENUM, Tree.Kind.CLASS), currentPath);
+        if (classInterfaceOrEnumPath == null) {
             throw new IllegalStateException("No class or interface in the java file!"); //NOI18N
         }
-        return (ClassTree) classOrInterfacePath.getLeaf();
+        return (ClassTree) classInterfaceOrEnumPath.getLeaf();
     }
 
     private List<VariableTree> getMethodParameters(List<?> parameters, TreeMaker make) {
@@ -267,8 +268,8 @@ public class MethodGenerator implements CodeGenerator {
         return dialog.isNativeMethod();
     }
 
-    private void setInsertIndex(ClassTree classTree) {
-        List<? extends Tree> members = classTree.getMembers();
+    private void setInsertIndex(ClassTree classInterfaceOrEnumTree) {
+        List<? extends Tree> members = classInterfaceOrEnumTree.getMembers();
         SourcePositions sourcePositions = trees.getSourcePositions();
         int size = members.size();
         switch (size) {

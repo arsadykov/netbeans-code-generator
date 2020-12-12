@@ -44,8 +44,8 @@ public class GenerateMethodDialog {
     private final DialogDescriptor dialogDescriptor;
     private final GenerateMethodPanel generateMethodPanel;
 
-    private GenerateMethodDialog(boolean isClass) {
-        generateMethodPanel = GenerateMethodPanel.create(isClass);
+    private GenerateMethodDialog(boolean isInterface) {
+        generateMethodPanel = GenerateMethodPanel.create(isInterface);
         dialogDescriptor = new DialogDescriptor(
                 generateMethodPanel, NbBundle.getMessage(GenerateMethodDialog.class, "DN_Generate_Method")); //NOI18N
         generateMethodPanel.setDialogDescriptor(dialogDescriptor);
@@ -55,8 +55,8 @@ public class GenerateMethodDialog {
         dialog.setVisible(true);
     }
 
-    public static GenerateMethodDialog createAndShow(boolean isClass) {
-        return new GenerateMethodDialog(isClass);
+    public static GenerateMethodDialog createAndShow(boolean isInterface) {
+        return new GenerateMethodDialog(isInterface);
     }
 
     public boolean isOkButtonPushed() {

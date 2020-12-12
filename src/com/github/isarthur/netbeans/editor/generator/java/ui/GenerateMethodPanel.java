@@ -77,9 +77,9 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
     private final DefaultTableModel throwsTableModel;
     private DialogDescriptor dialogDescriptor;
 
-    private GenerateMethodPanel(boolean isClass) {
+    private GenerateMethodPanel(boolean isInterface) {
         initComponents();
-        if (!isClass) {
+        if (isInterface) {
             accessComboBox.setEnabled(false);
             staticCheckBox.setEnabled(false);
             finalCheckBox.setEnabled(false);
@@ -122,8 +122,8 @@ public class GenerateMethodPanel extends javax.swing.JPanel implements DocumentL
         SwingUtilities.invokeLater(() -> typeTextField.requestFocusInWindow());
     }
 
-    public static GenerateMethodPanel create(boolean isClass) {
-        GenerateMethodPanel generateMethodPanel = new GenerateMethodPanel(isClass);
+    public static GenerateMethodPanel create(boolean isInterface) {
+        GenerateMethodPanel generateMethodPanel = new GenerateMethodPanel(isInterface);
         generateMethodPanel.getTypeTextField().getDocument().addDocumentListener(generateMethodPanel);
         generateMethodPanel.getNameTextField().getDocument().addDocumentListener(generateMethodPanel);
         return generateMethodPanel;

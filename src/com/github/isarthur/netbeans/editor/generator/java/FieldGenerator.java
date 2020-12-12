@@ -99,14 +99,15 @@ public class FieldGenerator implements CodeGenerator {
                     trees = workingCopy.getTrees();
                     treeUtilities = workingCopy.getTreeUtilities();
                     currentPath = treeUtilities.pathFor(caretPosition);
-                    TreePath classOrInterfacePath =
-                            treeUtilities.getPathElementOfKind(Set.of(Tree.Kind.CLASS, Tree.Kind.INTERFACE), currentPath);
-                    if (classOrInterfacePath == null) {
+                    TreePath classInterfaceOrEnumPath =
+                            treeUtilities.getPathElementOfKind(
+                                    Set.of(Tree.Kind.CLASS, Tree.Kind.ENUM, Tree.Kind.INTERFACE), currentPath);
+                    if (classInterfaceOrEnumPath == null) {
                         return;
                     }
-                    ClassTree oldTree = (ClassTree) classOrInterfacePath.getLeaf();
-                    setInsertIndex(oldTree);
-                    insertFieldsIntoClass(workingCopy);
+                    ClassTree currentTree = (ClassTree) classInterfaceOrEnumPath.getLeaf();
+                    setInsertIndex(currentTree);
+                    insertFieldsIntoClassInterfaceOrEnum(workingCopy);
                 }).commit();
             } catch (IOException ex) {
                 Exceptions.printStackTrace(ex);
@@ -116,9 +117,9 @@ public class FieldGenerator implements CodeGenerator {
         dialog.dispose();
     }
 
-    private void insertFieldsIntoClass(WorkingCopy workingCopy) {
-        ClassTree oldClassOrInterfaceTree = getClassOrInterfaceTree(workingCopy);
-        ClassTree newClassOrInterfaceTree = oldClassOrInterfaceTree;
+    private void insertFieldsIntoClassInterfaceOrEnum(WorkingCopy workingCopy) {
+        ClassTree currentClassInterfaceOrEnumTree = getClassInterfaceOrEnumTree(workingCopy);
+        ClassTree newClassInterfaceOrEnumTree = currentClassInterfaceOrEnumTree;
         TreeMaker make = workingCopy.getTreeMaker();
         List<?> data = dialog.getData();
         int numberOfRows = data.size();
@@ -158,8 +159,8 @@ public class FieldGenerator implements CodeGenerator {
             String fieldType = (String) ((List) data.get(row)).get(5);
             String fieldName = (String) ((List) data.get(row)).get(6);
             String fieldValue = (String) ((List) data.get(row)).get(7);
-            newClassOrInterfaceTree = make.insertClassMember(
-                    newClassOrInterfaceTree,
+            newClassInterfaceOrEnumTree = make.insertClassMember(
+                    newClassInterfaceOrEnumTree,
                     insertIndex + row,
                     make.Variable(
                             make.Modifiers(modifiers),
@@ -167,20 +168,20 @@ public class FieldGenerator implements CodeGenerator {
                             make.QualIdent(fieldType),
                             fieldValue.isEmpty() ? null : make.Identifier(fieldValue)));
         }
-        workingCopy.rewrite(oldClassOrInterfaceTree, newClassOrInterfaceTree);
+        workingCopy.rewrite(currentClassInterfaceOrEnumTree, newClassInterfaceOrEnumTree);
     }
 
-    private ClassTree getClassOrInterfaceTree(WorkingCopy workingCopy) {
-        TreePath classOrInterfacePath = workingCopy.getTreeUtilities()
-                .getPathElementOfKind(Set.of(Tree.Kind.CLASS, Tree.Kind.INTERFACE), currentPath);
-        if (classOrInterfacePath == null) {
-            throw new IllegalStateException("No class or interface in the java file!"); //NOI18N
+    private ClassTree getClassInterfaceOrEnumTree(WorkingCopy workingCopy) {
+        TreePath classInterfaceOrEnumPath = workingCopy.getTreeUtilities()
+                .getPathElementOfKind(Set.of(Tree.Kind.CLASS, Tree.Kind.ENUM, Tree.Kind.INTERFACE), currentPath);
+        if (classInterfaceOrEnumPath == null) {
+            throw new IllegalStateException("No class, interface or enum in the java file!"); //NOI18N
         }
-        return (ClassTree) classOrInterfacePath.getLeaf();
+        return (ClassTree) classInterfaceOrEnumPath.getLeaf();
     }
 
-    private void setInsertIndex(ClassTree classTree) {
-        List<? extends Tree> members = classTree.getMembers();
+    private void setInsertIndex(ClassTree classInterfaceOrEnumTree) {
+        List<? extends Tree> members = classInterfaceOrEnumTree.getMembers();
         SourcePositions sourcePositions = trees.getSourcePositions();
         int size = members.size();
         switch (size) {
